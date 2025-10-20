@@ -1,0 +1,659 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Control de Rendimiento de Embonchadores</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
+    <style>
+        body {
+            background: linear-gradient(135deg, #fce7f3 0%, #ffe4e6 100%);
+        }
+    </style>
+</head>
+<body class="min-h-screen p-6">
+    <div id="app" class="max-w-7xl mx-auto">
+        <div class="bg-white rounded-lg shadow-lg p-6 mb-6">
+            <h1 class="text-3xl font-bold text-rose-700 mb-2">
+                🌹 Florexport Shalom
+            </h1>
+            <p class="text-gray-600">Control de Rendimiento de Embonchadores</p>
+        </div>
+
+        <div class="flex gap-4 mb-6">
+            <button onclick="cambiarVista('registro')" id="btnRegistro" class="px-6 py-3 rounded-lg font-semibold transition bg-rose-600 text-white">
+                ➕ Registro
+            </button>
+            <button onclick="cambiarVista('estadisticas')" id="btnEstadisticas" class="px-6 py-3 rounded-lg font-semibold transition bg-white text-rose-600 hover:bg-rose-50">
+                📊 Estadísticas
+            </button>
+            <button onclick="exportarCSV()" class="ml-auto px-6 py-3 bg-green-600 text-white rounded-lg font-semibold hover:bg-green-700 transition">
+                💾 Exportar CSV
+            </button>
+            <button onclick="exportarPDF()" class="px-6 py-3 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition">
+                📄 Exportar PDF
+            </button>
+        </div>
+
+        <div id="vistaRegistro" class="vista-activa">
+            <div class="bg-white rounded-lg shadow-lg p-6 mb-6">
+                <h2 class="text-xl font-bold text-gray-800 mb-4">Agregar Registro</h2>
+                <div class="grid grid-cols-1 md:grid-cols-5 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Embonchador</label>
+                        <select id="empleado" class="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-rose-500">
+                            <option value="">Seleccionar...</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Cantidad</label>
+                        <input type="number" id="cantidad" min="1" class="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-rose-500" placeholder="Bonches">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Fecha</label>
+                        <input type="date" id="fecha" class="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-rose-500">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Hora</label>
+                        <select id="hora" class="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-rose-500">
+                            <option value="">Seleccionar...</option>
+                        </select>
+                    </div>
+                    <div class="flex items-end">
+                        <button onclick="agregarRegistro()" class="w-full p-2 bg-rose-600 text-white rounded-lg font-semibold hover:bg-rose-700 transition">
+                            Agregar
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-lg shadow-lg p-6">
+                <h2 class="text-xl font-bold text-gray-800 mb-4">Registros Recientes <span id="totalRegistros">(0)</span></h2>
+                <div class="overflow-x-auto">
+                    <table class="w-full">
+                        <thead class="bg-rose-100">
+                            <tr>
+                                <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700">Fecha</th>
+                                <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700">Hora</th>
+                                <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700">Mesa</th>
+                                <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700">Nombre</th>
+                                <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700">Cantidad</th>
+                                <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700">Acción</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tablaRegistros">
+                            <tr>
+                                <td colspan="6" class="px-4 py-8 text-center text-gray-500">
+                                    No hay registros aún. Agregue el primer registro arriba.
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div id="vistaEstadisticas" style="display: none;">
+            <div class="bg-white rounded-lg shadow-lg p-6">
+                <h2 class="text-xl font-bold text-gray-800 mb-4">Estadísticas de Producción</h2>
+                <div class="overflow-x-auto">
+                    <table class="w-full">
+                        <thead class="bg-rose-100">
+                            <tr>
+                                <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700">Mesa</th>
+                                <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700">Nombre</th>
+                                <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700">Total Bonches</th>
+                                <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700">Fecha</th>
+                                <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700">Días Trabajados</th>
+                                <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700">Total Horas</th>
+                                <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700">Prom. Horas/Día</th>
+                                <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700">Prom. Bonches/Hora</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tablaEstadisticas">
+                            <tr>
+                                <td colspan="7" class="px-4 py-8 text-center text-gray-500">
+                                    No hay datos para mostrar. Agregue registros primero.
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const empleados = [
+            { id: 1, nombre: "Maria Odilia Coj Paz", mesa: 1 },
+            { id: 2, nombre: "Anabelia Arana Guerra", mesa: 2 },
+            { id: 3, nombre: "Claudia Camey", mesa: 3 },
+            { id: 4, nombre: "Fidelia Aracely Chávez Quel", mesa: 4 },
+            { id: 5, nombre: "Josselyn Marleni Gómez Vielman", mesa: 5 },
+            { id: 6, nombre: "Katherine Estefany Santos Arana", mesa: 6 },
+            { id: 7, nombre: "Greysi Areli Pū Marcos", mesa: 7 },
+            { id: 8, nombre: "Ana Julia Morales Alvarez", mesa: 8 },
+            { id: 9, nombre: "Maria Lucia Subuyuj Car", mesa: 9 },
+            { id: 10, nombre: "Maria Isabel Cabrera Pool", mesa: 10 },
+            { id: 11, nombre: "Amilkar Saúl Chitamul", mesa: 11 },
+            { id: 12, nombre: "Damaris Julissa Ajcalon Hernández", mesa: 12 },
+            { id: 13, nombre: "Yaquelin Argueta", mesa: 13 },
+            { id: 14, nombre: "Hilda Argueta", mesa: 14 },
+            { id: 15, nombre: "Dulce Francisca Chocoj Elías", mesa: 15 },
+            { id: 16, nombre: "Nanci Amabilia Gómez Crisóstomo", mesa: 16 },
+            { id: 17, nombre: "Maria Alvara Paz Esquito", mesa: 17 },
+            { id: 18, nombre: "Gladys Marisol Chávez Quel", mesa: 18 },
+            { id: 19, nombre: "Lidia Maribel Yuc Ajpop", mesa: 19 },
+            { id: 20, nombre: "Delmi Evelia Per", mesa: 20 }
+        ];
+
+        const horasDisponibles = [
+            '06:00 - 07:00', '07:00 - 08:00', '08:00 - 09:00',
+            '09:00 - 10:00', '10:00 - 11:00', '11:00 - 12:00',
+            '12:00 - 13:00', '13:00 - 14:00', '14:00 - 15:00',
+            '15:00 - 16:00', '16:00 - 17:00'
+        ];
+
+        let registros = [];
+
+        function inicializar() {
+            const selectEmpleado = document.getElementById('empleado');
+            empleados.forEach(emp => {
+                const option = document.createElement('option');
+                option.value = emp.id;
+                option.textContent = `Mesa ${emp.mesa} - ${emp.nombre}`;
+                selectEmpleado.appendChild(option);
+            });
+
+            const selectHora = document.getElementById('hora');
+            horasDisponibles.forEach(hora => {
+                const option = document.createElement('option');
+                option.value = hora;
+                option.textContent = hora;
+                selectHora.appendChild(option);
+            });
+
+            document.getElementById('fecha').valueAsDate = new Date();
+        }
+
+        function agregarRegistro() {
+            const empleadoId = parseInt(document.getElementById('empleado').value);
+            const cantidad = parseInt(document.getElementById('cantidad').value);
+            const fecha = document.getElementById('fecha').value;
+            const hora = document.getElementById('hora').value;
+
+            if (!empleadoId || !cantidad || cantidad <= 0 || !fecha || !hora) {
+                alert('Por favor complete todos los campos correctamente');
+                return;
+            }
+
+            const empleado = empleados.find(e => e.id === empleadoId);
+            const registro = {
+                id: Date.now(),
+                empleadoId: empleado.id,
+                nombre: empleado.nombre,
+                mesa: empleado.mesa,
+                cantidad: cantidad,
+                fecha: fecha,
+                hora: hora,
+                timestamp: Date.now()
+            };
+
+            registros.push(registro);
+            document.getElementById('cantidad').value = '';
+            document.getElementById('hora').value = '';
+            
+            actualizarTablaRegistros();
+            actualizarEstadisticas();
+        }
+
+        function eliminarRegistro(id) {
+            registros = registros.filter(r => r.id !== id);
+            actualizarTablaRegistros();
+            actualizarEstadisticas();
+        }
+
+        function actualizarTablaRegistros() {
+            const tbody = document.getElementById('tablaRegistros');
+            document.getElementById('totalRegistros').textContent = `(${registros.length})`;
+
+            if (registros.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="6" class="px-4 py-8 text-center text-gray-500">
+                            No hay registros aún. Agregue el primer registro arriba.
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            const registrosOrdenados = [...registros].sort((a, b) => b.timestamp - a.timestamp);
+            tbody.innerHTML = registrosOrdenados.map((reg, idx) => `
+                <tr class="${idx % 2 === 0 ? 'bg-white' : 'bg-gray-50'}">
+                    <td class="px-4 py-3 text-sm">${reg.fecha}</td>
+                    <td class="px-4 py-3 text-sm">${reg.hora}</td>
+                    <td class="px-4 py-3 text-sm font-semibold">${reg.mesa}</td>
+                    <td class="px-4 py-3 text-sm">${reg.nombre}</td>
+                    <td class="px-4 py-3 text-sm">
+                        <span class="bg-rose-100 text-rose-700 px-3 py-1 rounded-full font-semibold">
+                            ${reg.cantidad}
+                        </span>
+                    </td>
+                    <td class="px-4 py-3 text-sm">
+                        <button onclick="eliminarRegistro(${reg.id})" class="text-red-600 hover:text-red-800 transition">
+                            🗑️
+                        </button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function calcularEstadisticas() {
+            const estadisticas = {};
+
+            empleados.forEach(emp => {
+                const registrosEmpleado = registros.filter(r => r.empleadoId === emp.id);
+
+                if (registrosEmpleado.length > 0) {
+                    const totalBonches = registrosEmpleado.reduce((sum, r) => sum + r.cantidad, 0);
+                    const fechasUnicas = [...new Set(registrosEmpleado.map(r => r.fecha))];
+                    const horasPorDia = {};
+
+                    fechasUnicas.forEach(f => {
+                        const regsDia = registrosEmpleado.filter(r => r.fecha === f);
+                        horasPorDia[f] = regsDia.length;
+                    });
+
+                    const totalHoras = Object.values(horasPorDia).reduce((sum, h) => sum + h, 0);
+                    const fecha = fechasUnicas;
+                    const diasTrabajados = fechasUnicas.length;
+                    const promedioHorasDia = diasTrabajados > 0 ? (totalHoras / diasTrabajados).toFixed(1) : 0;
+                    const promedioBonchesPorHora = totalHoras > 0 ? (totalBonches / totalHoras).toFixed(1) : 0;
+
+                    estadisticas[emp.id] = {
+                        nombre: emp.nombre,
+                        mesa: emp.mesa,
+                        totalBonches,
+                        fecha,
+                        diasTrabajados,
+                        totalHoras,
+                        promedioHorasDia,
+                        promedioBonchesPorHora
+                    };
+                }
+            });
+
+            return estadisticas;
+        }
+
+        function actualizarEstadisticas() {
+            const tbody = document.getElementById('tablaEstadisticas');
+            const estadisticas = calcularEstadisticas();
+            const statsArray = Object.values(estadisticas).sort((a, b) => b.totalBonches - a.totalBonches);
+
+            if (statsArray.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="7" class="px-4 py-8 text-center text-gray-500">
+                            No hay datos para mostrar. Agregue registros primero.
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            tbody.innerHTML = statsArray.map((stat, idx) => `
+                <tr class="${idx % 2 === 0 ? 'bg-white' : 'bg-gray-50'}">
+                    <td class="px-4 py-3 text-sm font-semibold">${stat.mesa}</td>
+                    <td class="px-4 py-3 text-sm">${stat.nombre}</td>
+                    <td class="px-4 py-3 text-sm">
+                        <span class="bg-rose-100 text-rose-700 px-3 py-1 rounded-full font-semibold">
+                            ${stat.totalBonches}
+                        </span>
+                    </td>
+                    <td class="px-4 py-3 text-sm">${stat.fecha}</td>
+                    <td class="px-4 py-3 text-sm">${stat.diasTrabajados}</td>
+                    <td class="px-4 py-3 text-sm">${stat.totalHoras}</td>
+                    <td class="px-4 py-3 text-sm">${stat.promedioHorasDia}</td>
+                    <td class="px-4 py-3 text-sm">
+                        <span class="bg-green-100 text-green-700 px-3 py-1 rounded-full font-semibold">
+                            ${stat.promedioBonchesPorHora}
+                        </span>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function cambiarVista(vista) {
+            document.getElementById('vistaRegistro').style.display = vista === 'registro' ? 'block' : 'none';
+            document.getElementById('vistaEstadisticas').style.display = vista === 'estadisticas' ? 'block' : 'none';
+
+            document.getElementById('btnRegistro').className = vista === 'registro' 
+                ? 'px-6 py-3 rounded-lg font-semibold transition bg-rose-600 text-white'
+                : 'px-6 py-3 rounded-lg font-semibold transition bg-white text-rose-600 hover:bg-rose-50';
+
+            document.getElementById('btnEstadisticas').className = vista === 'estadisticas'
+                ? 'px-6 py-3 rounded-lg font-semibold transition bg-rose-600 text-white'
+                : 'px-6 py-3 rounded-lg font-semibold transition bg-white text-rose-600 hover:bg-rose-50';
+
+            if (vista === 'estadisticas') {
+                actualizarEstadisticas();
+            }
+        }
+
+        function exportarPDF() {
+            if (registros.length === 0) {
+                alert('No hay registros para exportar');
+                return;
+            }
+
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF('l', 'mm', 'a4'); // landscape, milímetros, tamaño A4
+            
+            const fechaActual = new Date().toLocaleDateString('es-GT', { 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric' 
+            });
+
+            // CONFIGURACIÓN DE COLORES
+            const colorPrimario = [225, 29, 72]; // Rose
+            const colorSecundario = [252, 231, 243]; // Rose claro
+            const colorTexto = [31, 41, 55]; // Gris oscuro
+
+            // ENCABEZADO
+            doc.setFillColor(...colorPrimario);
+            doc.rect(0, 0, 297, 35, 'F');
+            
+            doc.setTextColor(255, 255, 255);
+            doc.setFontSize(22);
+            doc.setFont(undefined, 'bold');
+            doc.text('REPORTE DE PRODUCCIÓN DE BONCHES DE ROSAS', 148.5, 15, { align: 'center' });
+            
+            doc.setFontSize(12);
+            doc.setFont(undefined, 'normal');
+            doc.text(`Fecha de Reporte: ${fechaActual}`, 148.5, 25, { align: 'center' });
+
+            let yPos = 45;
+
+            // SECCIÓN 1: REGISTROS DETALLADOS
+            doc.setTextColor(...colorTexto);
+            doc.setFontSize(14);
+            doc.setFont(undefined, 'bold');
+            doc.text('REGISTROS HORA POR HORA', 14, yPos);
+            yPos += 3;
+
+            const registrosOrdenados = [...registros].sort((a, b) => {
+                if (a.fecha !== b.fecha) return a.fecha.localeCompare(b.fecha);
+                return a.hora.localeCompare(b.hora);
+            });
+
+            const dataRegistros = registrosOrdenados.map(r => [
+                r.fecha,
+                r.hora,
+                r.mesa,
+                r.nombre,
+                r.cantidad
+            ]);
+
+            doc.autoTable({
+                startY: yPos,
+                head: [['Fecha', 'Hora', 'Mesa', 'Nombre del Empleado', 'Bonches']],
+                body: dataRegistros,
+                theme: 'striped',
+                headStyles: { 
+                    fillColor: colorPrimario,
+                    textColor: [255, 255, 255],
+                    fontStyle: 'bold',
+                    halign: 'center'
+                },
+                styles: { 
+                    fontSize: 9,
+                    cellPadding: 3
+                },
+                columnStyles: {
+                    0: { halign: 'center', cellWidth: 30 },
+                    1: { halign: 'center', cellWidth: 35 },
+                    2: { halign: 'center', cellWidth: 20 },
+                    3: { halign: 'left', cellWidth: 100 },
+                    4: { halign: 'center', cellWidth: 25, fontStyle: 'bold' }
+                },
+                alternateRowStyles: { fillColor: colorSecundario }
+            });
+
+            const totalBonchesGeneral = registros.reduce((sum, r) => sum + r.cantidad, 0);
+            yPos = doc.lastAutoTable.finalY + 5;
+            
+            doc.setFontSize(11);
+            doc.setFont(undefined, 'bold');
+            doc.text(`TOTAL GENERAL DE BONCHES: ${totalBonchesGeneral}`, 14, yPos);
+
+            // NUEVA PÁGINA PARA ESTADÍSTICAS
+            doc.addPage();
+            yPos = 20;
+
+            // SECCIÓN 2: RESUMEN POR EMPLEADO
+            doc.setFontSize(14);
+            doc.text('RESUMEN DE PRODUCCIÓN POR EMPLEADO', 14, yPos);
+            yPos += 3;
+
+            const stats = calcularEstadisticas();
+            const statsOrdenados = Object.values(stats).sort((a, b) => a.mesa - b.mesa);
+
+            const dataEstadisticas = statsOrdenados.map(s => [
+                s.mesa,
+                s.nombre,
+                s.totalBonches,
+                s.fechasTrabajadas,
+                s.totalHoras,
+                s.promedioHorasDia,
+                s.promedioBonchesPorHora
+            ]);
+
+            doc.autoTable({
+                startY: yPos,
+                head: [['Mesa', 'Nombre', 'Total Bonches', 'Fechas Trabajadas', 'Horas', 'Prom. H/Día', 'Prom. B/H']],
+                body: dataEstadisticas,
+                theme: 'striped',
+                headStyles: { 
+                    fillColor: colorPrimario,
+                    textColor: [255, 255, 255],
+                    fontStyle: 'bold',
+                    halign: 'center',
+                    fontSize: 8
+                },
+                styles: { 
+                    fontSize: 8,
+                    cellPadding: 2
+                },
+                columnStyles: {
+                    0: { halign: 'center', cellWidth: 15 },
+                    1: { halign: 'left', cellWidth: 60 },
+                    2: { halign: 'center', cellWidth: 25, fontStyle: 'bold' },
+                    3: { halign: 'center', cellWidth: 70, fontSize: 7 },
+                    4: { halign: 'center', cellWidth: 20 },
+                    5: { halign: 'center', cellWidth: 25 },
+                    6: { halign: 'center', cellWidth: 25, fontStyle: 'bold', textColor: [22, 163, 74] }
+                },
+                alternateRowStyles: { fillColor: colorSecundario }
+            });
+
+            // TOTALES
+            const totalEmpleados = statsOrdenados.length;
+            const totalHorasRegistradas = statsOrdenados.reduce((sum, s) => sum + s.totalHoras, 0);
+            const promedioGeneralBonches = totalHorasRegistradas > 0 ? (totalBonchesGeneral / totalHorasRegistradas).toFixed(1) : 0;
+
+            yPos = doc.lastAutoTable.finalY + 8;
+            
+            doc.setFillColor(...colorSecundario);
+            doc.rect(14, yPos - 5, 270, 15, 'F');
+            
+            doc.setTextColor(...colorPrimario);
+            doc.setFontSize(11);
+            doc.setFont(undefined, 'bold');
+            doc.text(`TOTALES: ${totalEmpleados} empleados  |  ${totalBonchesGeneral} bonches  |  ${totalHorasRegistradas} horas  |  ${promedioGeneralBonches} bonches/hora promedio`, 148.5, yPos + 2, { align: 'center' });
+
+            // SECCIÓN 3: TOP 5 PRODUCTORES
+            yPos += 25;
+            doc.setTextColor(...colorTexto);
+            doc.setFontSize(14);
+            doc.text('TOP 5 PRODUCTORES', 14, yPos);
+            yPos += 3;
+
+            const top5 = [...statsOrdenados].sort((a, b) => b.totalBonches - a.totalBonches).slice(0, 5);
+            
+            const dataTop5 = top5.map((s, idx) => [
+                `${idx + 1}°`,
+                s.mesa,
+                s.nombre,
+                s.totalBonches,
+                s.promedioBonchesPorHora
+            ]);
+
+            doc.autoTable({
+                startY: yPos,
+                head: [['Pos.', 'Mesa', 'Nombre', 'Total Bonches', 'Prom. Bonches/Hora']],
+                body: dataTop5,
+                theme: 'grid',
+                headStyles: { 
+                    fillColor: [234, 179, 8], // Amarillo/oro
+                    textColor: [255, 255, 255],
+                    fontStyle: 'bold',
+                    halign: 'center'
+                },
+                styles: { 
+                    fontSize: 10,
+                    cellPadding: 4
+                },
+                columnStyles: {
+                    0: { halign: 'center', cellWidth: 20, fontStyle: 'bold', fontSize: 12 },
+                    1: { halign: 'center', cellWidth: 20 },
+                    2: { halign: 'left', cellWidth: 120 },
+                    3: { halign: 'center', cellWidth: 35, fontStyle: 'bold', textColor: colorPrimario },
+                    4: { halign: 'center', cellWidth: 40, fontStyle: 'bold', textColor: [22, 163, 74] }
+                },
+                didDrawCell: (data) => {
+                    if (data.section === 'body' && data.column.index === 0) {
+                        const row = data.row.index;
+                        if (row === 0) {
+                            doc.setFillColor(255, 215, 0); // Oro
+                        } else if (row === 1) {
+                            doc.setFillColor(192, 192, 192); // Plata
+                        } else if (row === 2) {
+                            doc.setFillColor(205, 127, 50); // Bronce
+                        }
+                        if (row < 3) {
+                            doc.rect(data.cell.x, data.cell.y, data.cell.width, data.cell.height, 'F');
+                            doc.setTextColor(255, 255, 255);
+                            doc.setFontSize(12);
+                            doc.setFont(undefined, 'bold');
+                            doc.text(data.cell.text[0], data.cell.x + data.cell.width / 2, data.cell.y + data.cell.height / 2 + 2, { align: 'center' });
+                        }
+                    }
+                }
+            });
+
+            // PIE DE PÁGINA
+            const pageCount = doc.internal.getNumberOfPages();
+            for (let i = 1; i <= pageCount; i++) {
+                doc.setPage(i);
+                doc.setFontSize(8);
+                doc.setTextColor(128, 128, 128);
+                doc.text(`Página ${i} de ${pageCount}`, 148.5, 200, { align: 'center' });
+                doc.text('Sistema de Inventario de Bonches - Generado automáticamente', 148.5, 205, { align: 'center' });
+            }
+
+            // GUARDAR PDF
+            doc.save(`Reporte_Bonches_${fechaActual}.pdf`);
+        }
+
+        function exportarCSV() {
+            if (registros.length === 0) {
+                alert('No hay registros para exportar');
+                return;
+            }
+
+            const fechaActual = new Date().toLocaleDateString('es-GT');
+            let csv = '\uFEFF'; // BOM para UTF-8
+            
+            // ENCABEZADO PRINCIPAL
+            csv += '═══════════════════════════════════════════════════════════════════════════════\n';
+            csv += '                    REPORTE DE PRODUCCIÓN DE BONCHES DE ROSAS\n';
+            csv += `                              Fecha de Reporte: ${fechaActual}\n`;
+            csv += '═══════════════════════════════════════════════════════════════════════════════\n\n';
+
+            // SECCIÓN 1: REGISTROS DETALLADOS
+            csv += '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n';
+            csv += '                           REGISTROS HORA POR HORA\n';
+            csv += '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n';
+            csv += 'Fecha,Hora,Mesa,Nombre del Empleado,Cantidad de Bonches\n';
+
+            const registrosOrdenados = [...registros].sort((a, b) => {
+                if (a.fecha !== b.fecha) return a.fecha.localeCompare(b.fecha);
+                return a.hora.localeCompare(b.hora);
+            });
+
+            registrosOrdenados.forEach(r => {
+                csv += `${r.fecha},${r.hora},${r.mesa},"${r.nombre}",${r.cantidad}\n`;
+            });
+
+            const totalBonchesGeneral = registros.reduce((sum, r) => sum + r.cantidad, 0);
+            csv += '\n';
+            csv += `,,,,\n`;
+            csv += `,,,TOTAL GENERAL:,${totalBonchesGeneral}\n`;
+
+            // SECCIÓN 2: RESUMEN POR EMPLEADO
+            csv += '\n\n';
+            csv += '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n';
+            csv += '                        RESUMEN DE PRODUCCIÓN POR EMPLEADO\n';
+            csv += '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n';
+            csv += 'Mesa,Nombre del Empleado,Total Bonches,Días Trabajados,Total Horas Registradas,Promedio Horas por Día,Promedio Bonches por Hora\n';
+
+            const stats = calcularEstadisticas();
+            const statsOrdenados = Object.values(stats).sort((a, b) => a.mesa - b.mesa);
+            
+            statsOrdenados.forEach(s => {
+                csv += `${s.mesa},"${s.nombre}",${s.totalBonches},${s.diasTrabajados},${s.totalHoras},${s.promedioHorasDia},${s.promedioBonchesPorHora}\n`;
+            });
+
+            // TOTALES DEL RESUMEN
+            const totalEmpleados = statsOrdenados.length;
+            const totalDiasTrabajados = statsOrdenados.reduce((sum, s) => sum + s.diasTrabajados, 0);
+            const totalHorasRegistradas = statsOrdenados.reduce((sum, s) => sum + s.totalHoras, 0);
+            const promedioGeneralBonches = totalHorasRegistradas > 0 ? (totalBonchesGeneral / totalHorasRegistradas).toFixed(1) : 0;
+
+            csv += '\n';
+            csv += `TOTALES:,${totalEmpleados} empleados,${totalBonchesGeneral} bonches,,${totalHorasRegistradas} horas,,${promedioGeneralBonches} bonches/hora\n`;
+
+            // SECCIÓN 3: TOP PRODUCTORES
+            csv += '\n\n';
+            csv += '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n';
+            csv += '                            TOP 5 PRODUCTORES\n';
+            csv += '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n';
+            csv += 'Posición,Mesa,Nombre,Total Bonches,Promedio por Hora\n';
+
+            const top5 = [...statsOrdenados].sort((a, b) => b.totalBonches - a.totalBonches).slice(0, 5);
+            top5.forEach((s, idx) => {
+                csv += `${idx + 1},${s.mesa},"${s.nombre}",${s.totalBonches},${s.promedioBonchesPorHora}\n`;
+            });
+
+            // PIE DE PÁGINA
+            csv += '\n\n';
+            csv += '═══════════════════════════════════════════════════════════════════════════════\n';
+            csv += '                    Fin del Reporte - Sistema de Inventario de Bonches\n';
+            csv += '═══════════════════════════════════════════════════════════════════════════════\n';
+
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = `Reporte_Bonches_${new Date().toISOString().split('T')[0]}.csv`;
+            link.click();
+        }
+
+        inicializar();
+    </script>
+</body>
+</html>
