@@ -344,6 +344,232 @@
             }
         }
 
+        function exportarPDF() {
+            if (registros.length === 0) {
+                alert('No hay registros para exportar');
+                return;
+            }
+
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF('l', 'mm', 'a4'); // landscape, milímetros, tamaño A4
+            
+            const fechaActual = new Date().toLocaleDateString('es-GT', { 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric' 
+            });
+
+            // CONFIGURACIÓN DE COLORES
+            const colorPrimario = [225, 29, 72]; // Rose
+            const colorSecundario = [252, 231, 243]; // Rose claro
+            const colorTexto = [31, 41, 55]; // Gris oscuro
+
+            // ENCABEZADO
+            doc.setFillColor(...colorPrimario);
+            doc.rect(0, 0, 297, 35, 'F');
+            
+            doc.setTextColor(255, 255, 255);
+            doc.setFontSize(22);
+            doc.setFont(undefined, 'bold');
+            doc.text('REPORTE DE PRODUCCIÓN DE BONCHES DE ROSAS', 148.5, 15, { align: 'center' });
+            
+            doc.setFontSize(12);
+            doc.setFont(undefined, 'normal');
+            doc.text(`Fecha de Reporte: ${fechaActual}`, 148.5, 25, { align: 'center' });
+
+            let yPos = 45;
+
+            // SECCIÓN 1: REGISTROS DETALLADOS
+            doc.setTextColor(...colorTexto);
+            doc.setFontSize(14);
+            doc.setFont(undefined, 'bold');
+            doc.text('REGISTROS HORA POR HORA', 14, yPos);
+            yPos += 3;
+
+            const registrosOrdenados = [...registros].sort((a, b) => {
+                if (a.fecha !== b.fecha) return a.fecha.localeCompare(b.fecha);
+                return a.hora.localeCompare(b.hora);
+            });
+
+            const dataRegistros = registrosOrdenados.map(r => [
+                r.fecha,
+                r.hora,
+                r.mesa,
+                r.nombre,
+                r.cantidad
+            ]);
+
+            doc.autoTable({
+                startY: yPos,
+                head: [['Fecha', 'Hora', 'Mesa', 'Nombre del Empleado', 'Bonches']],
+                body: dataRegistros,
+                theme: 'striped',
+                headStyles: { 
+                    fillColor: colorPrimario,
+                    textColor: [255, 255, 255],
+                    fontStyle: 'bold',
+                    halign: 'center'
+                },
+                styles: { 
+                    fontSize: 9,
+                    cellPadding: 3
+                },
+                columnStyles: {
+                    0: { halign: 'center', cellWidth: 30 },
+                    1: { halign: 'center', cellWidth: 35 },
+                    2: { halign: 'center', cellWidth: 20 },
+                    3: { halign: 'left', cellWidth: 100 },
+                    4: { halign: 'center', cellWidth: 25, fontStyle: 'bold' }
+                },
+                alternateRowStyles: { fillColor: colorSecundario }
+            });
+
+            const totalBonchesGeneral = registros.reduce((sum, r) => sum + r.cantidad, 0);
+            yPos = doc.lastAutoTable.finalY + 5;
+            
+            doc.setFontSize(11);
+            doc.setFont(undefined, 'bold');
+            doc.text(`TOTAL GENERAL DE BONCHES: ${totalBonchesGeneral}`, 14, yPos);
+
+            // NUEVA PÁGINA PARA ESTADÍSTICAS
+            doc.addPage();
+            yPos = 20;
+
+            // SECCIÓN 2: RESUMEN POR EMPLEADO
+            doc.setFontSize(14);
+            doc.text('RESUMEN DE PRODUCCIÓN POR EMPLEADO', 14, yPos);
+            yPos += 3;
+
+            const stats = calcularEstadisticas();
+            const statsOrdenados = Object.values(stats).sort((a, b) => a.mesa - b.mesa);
+
+            const dataEstadisticas = statsOrdenados.map(s => [
+                s.mesa,
+                s.nombre,
+                s.totalBonches,
+                s.fechasTrabajadas,
+                s.totalHoras,
+                s.promedioHorasDia,
+                s.promedioBonchesPorHora
+            ]);
+
+            doc.autoTable({
+                startY: yPos,
+                head: [['Mesa', 'Nombre', 'Total Bonches', 'Fechas Trabajadas', 'Horas', 'Prom. H/Día', 'Prom. B/H']],
+                body: dataEstadisticas,
+                theme: 'striped',
+                headStyles: { 
+                    fillColor: colorPrimario,
+                    textColor: [255, 255, 255],
+                    fontStyle: 'bold',
+                    halign: 'center',
+                    fontSize: 8
+                },
+                styles: { 
+                    fontSize: 8,
+                    cellPadding: 2
+                },
+                columnStyles: {
+                    0: { halign: 'center', cellWidth: 15 },
+                    1: { halign: 'left', cellWidth: 60 },
+                    2: { halign: 'center', cellWidth: 25, fontStyle: 'bold' },
+                    3: { halign: 'center', cellWidth: 70, fontSize: 7 },
+                    4: { halign: 'center', cellWidth: 20 },
+                    5: { halign: 'center', cellWidth: 25 },
+                    6: { halign: 'center', cellWidth: 25, fontStyle: 'bold', textColor: [22, 163, 74] }
+                },
+                alternateRowStyles: { fillColor: colorSecundario }
+            });
+
+            // TOTALES
+            const totalEmpleados = statsOrdenados.length;
+            const totalHorasRegistradas = statsOrdenados.reduce((sum, s) => sum + s.totalHoras, 0);
+            const promedioGeneralBonches = totalHorasRegistradas > 0 ? (totalBonchesGeneral / totalHorasRegistradas).toFixed(1) : 0;
+
+            yPos = doc.lastAutoTable.finalY + 8;
+            
+            doc.setFillColor(...colorSecundario);
+            doc.rect(14, yPos - 5, 270, 15, 'F');
+            
+            doc.setTextColor(...colorPrimario);
+            doc.setFontSize(11);
+            doc.setFont(undefined, 'bold');
+            doc.text(`TOTALES: ${totalEmpleados} empleados  |  ${totalBonchesGeneral} bonches  |  ${totalHorasRegistradas} horas  |  ${promedioGeneralBonches} bonches/hora promedio`, 148.5, yPos + 2, { align: 'center' });
+
+            // SECCIÓN 3: TOP 5 PRODUCTORES
+            yPos += 25;
+            doc.setTextColor(...colorTexto);
+            doc.setFontSize(14);
+            doc.text('TOP 5 PRODUCTORES', 14, yPos);
+            yPos += 3;
+
+            const top5 = [...statsOrdenados].sort((a, b) => b.totalBonches - a.totalBonches).slice(0, 5);
+            
+            const dataTop5 = top5.map((s, idx) => [
+                `${idx + 1}°`,
+                s.mesa,
+                s.nombre,
+                s.totalBonches,
+                s.promedioBonchesPorHora
+            ]);
+
+            doc.autoTable({
+                startY: yPos,
+                head: [['Pos.', 'Mesa', 'Nombre', 'Total Bonches', 'Prom. Bonches/Hora']],
+                body: dataTop5,
+                theme: 'grid',
+                headStyles: { 
+                    fillColor: [234, 179, 8], // Amarillo/oro
+                    textColor: [255, 255, 255],
+                    fontStyle: 'bold',
+                    halign: 'center'
+                },
+                styles: { 
+                    fontSize: 10,
+                    cellPadding: 4
+                },
+                columnStyles: {
+                    0: { halign: 'center', cellWidth: 20, fontStyle: 'bold', fontSize: 12 },
+                    1: { halign: 'center', cellWidth: 20 },
+                    2: { halign: 'left', cellWidth: 120 },
+                    3: { halign: 'center', cellWidth: 35, fontStyle: 'bold', textColor: colorPrimario },
+                    4: { halign: 'center', cellWidth: 40, fontStyle: 'bold', textColor: [22, 163, 74] }
+                },
+                didDrawCell: (data) => {
+                    if (data.section === 'body' && data.column.index === 0) {
+                        const row = data.row.index;
+                        if (row === 0) {
+                            doc.setFillColor(255, 215, 0); // Oro
+                        } else if (row === 1) {
+                            doc.setFillColor(192, 192, 192); // Plata
+                        } else if (row === 2) {
+                            doc.setFillColor(205, 127, 50); // Bronce
+                        }
+                        if (row < 3) {
+                            doc.rect(data.cell.x, data.cell.y, data.cell.width, data.cell.height, 'F');
+                            doc.setTextColor(255, 255, 255);
+                            doc.setFontSize(12);
+                            doc.setFont(undefined, 'bold');
+                            doc.text(data.cell.text[0], data.cell.x + data.cell.width / 2, data.cell.y + data.cell.height / 2 + 2, { align: 'center' });
+                        }
+                    }
+                }
+            });
+
+            // PIE DE PÁGINA
+            const pageCount = doc.internal.getNumberOfPages();
+            for (let i = 1; i <= pageCount; i++) {
+                doc.setPage(i);
+                doc.setFontSize(8);
+                doc.setTextColor(128, 128, 128);
+                doc.text(`Página ${i} de ${pageCount}`, 148.5, 200, { align: 'center' });
+                doc.text('Sistema de Inventario de Bonches - Generado automáticamente', 148.5, 205, { align: 'center' });
+            }
+
+            // GUARDAR PDF
+            doc.save(`Reporte_Bonches_${fechaActual}.pdf`);
+        }
+
         function exportarCSV() {
             if (registros.length === 0) {
                 alert('No hay registros para exportar');
