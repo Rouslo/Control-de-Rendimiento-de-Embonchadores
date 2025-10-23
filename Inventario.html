@@ -305,8 +305,14 @@
             };
 
             registros.push(registro);
+
+            // Limpiar formulario
             document.getElementById('cantidad').value = '';
             document.getElementById('hora').value = '';
+            document.getElementById('variedad').value = '';
+            document.getElementById('tamanio').value = '';
+            document.getElementById('empaque').value = '';
+            document.getElementById('observaciones').value = '';
             
             actualizarTablaRegistros();
             actualizarEstadisticas();
@@ -340,11 +346,16 @@
                     <td class="px-4 py-3 text-sm">${reg.hora}</td>
                     <td class="px-4 py-3 text-sm font-semibold">${reg.mesa}</td>
                     <td class="px-4 py-3 text-sm">${reg.nombre}</td>
+                    <td class="px-4 py-3 text-sm text-gray-600">${reg.clasificadora}</td>
+                    <td class="px-4 py-3 text-sm"><span class="bg-purple-100 text-purple-700 px-2 py-1 rounded text-xs">${reg.variedad}</span></td>
+                    <td class="px-4 py-3 text-sm">${reg.tamanio}</td>
+                    <td class="px-4 py-3 text-sm"><span class="bg-blue-100 text-blue-700 px-2 py-1 rounded text-xs">${reg.empaque}</span></td>
                     <td class="px-4 py-3 text-sm">
                         <span class="bg-rose-100 text-rose-700 px-3 py-1 rounded-full font-semibold">
                             ${reg.cantidad}
                         </span>
                     </td>
+                    <td class="px-4 py-3 text-sm text-gray-600 max-w-xs truncate" title="${reg.observaciones || 'Sin observaciones'}">${reg.observaciones || '-'}</td>
                     <td class="px-4 py-3 text-sm">
                         <button onclick="eliminarRegistro(${reg.id})" class="text-red-600 hover:text-red-800 transition">
                             🗑️
@@ -378,6 +389,7 @@
 
                     estadisticas[emp.id] = {
                         nombre: emp.nombre,
+                        claificadora: emp.clasificadora,
                         mesa: emp.mesa,
                         totalBonches,
                         fecha,
@@ -400,7 +412,7 @@
             if (statsArray.length === 0) {
                 tbody.innerHTML = `
                     <tr>
-                        <td colspan="7" class="px-4 py-8 text-center text-gray-500">
+                        <td colspan="8" class="px-4 py-8 text-center text-gray-500">
                             No hay datos para mostrar. Agregue registros primero.
                         </td>
                     </tr>
@@ -412,6 +424,7 @@
                 <tr class="${idx % 2 === 0 ? 'bg-white' : 'bg-gray-50'}">
                     <td class="px-4 py-3 text-sm font-semibold">${stat.mesa}</td>
                     <td class="px-4 py-3 text-sm">${stat.nombre}</td>
+                    <td class="px-4 py-3 text-sm text-gray-600">${stat.claificadora}</td>
                     <td class="px-4 py-3 text-sm">
                         <span class="bg-rose-100 text-rose-700 px-3 py-1 rounded-full font-semibold">
                             ${stat.totalBonches}
@@ -457,9 +470,9 @@
             const doc = new jsPDF('l', 'mm', 'a4'); // landscape, milímetros, tamaño A4
             
             const fechaActual = new Date().toLocaleDateString('es-GT', { 
-                year: 'numeric', 
+                day: 'numeric',
                 month: 'long', 
-                day: 'numeric' 
+                year: 'numeric' 
             });
 
             // CONFIGURACIÓN DE COLORES
@@ -499,30 +512,41 @@
                 r.hora,
                 r.mesa,
                 r.nombre,
-                r.cantidad
+                r.claificadora,
+                r.variedad,
+                r.tamanio,
+                r.empaque,
+                r.cantidad,
+                r.observaciones || '-'
             ]);
 
             doc.autoTable({
                 startY: yPos,
-                head: [['Fecha', 'Hora', 'Mesa', 'Nombre del Empleado', 'Bonches']],
+                head: [['Fecha', 'Hora', 'M', 'Embonchadora', 'Clasificadora', 'Variedad', 'Tamaño', 'Empaque', 'Cant', 'Obs']],
                 body: dataRegistros,
                 theme: 'striped',
                 headStyles: { 
                     fillColor: colorPrimario,
                     textColor: [255, 255, 255],
                     fontStyle: 'bold',
-                    halign: 'center'
+                    halign: 'center',
+                    fontSize: 7
                 },
                 styles: { 
-                    fontSize: 9,
-                    cellPadding: 3
+                    fontSize: 7,
+                    cellPadding: 2
                 },
                 columnStyles: {
-                    0: { halign: 'center', cellWidth: 30 },
-                    1: { halign: 'center', cellWidth: 35 },
-                    2: { halign: 'center', cellWidth: 20 },
-                    3: { halign: 'left', cellWidth: 100 },
-                    4: { halign: 'center', cellWidth: 25, fontStyle: 'bold' }
+                    0: { halign: 'center', cellWidth: 22 },
+                    1: { halign: 'center', cellWidth: 25 },
+                    2: { halign: 'center', cellWidth: 8 },
+                    3: { halign: 'left', cellWidth: 45 },
+                    4: { halign: 'left', cellWidth: 40 },
+                    5: { halign: 'center', cellWidth: 25 },
+                    6: { halign: 'center', cellWidth: 18 },
+                    7: { halign: 'center', cellWidth: 25 },
+                    8: { halign: 'center', cellWidth: 15, fontStyle: 'bold' },
+                    9: { halign: 'left', cellWidth: 50, fontSize: 6 }
                 },
                 alternateRowStyles: { fillColor: colorSecundario }
             });
