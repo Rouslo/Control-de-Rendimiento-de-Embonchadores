@@ -17,10 +17,15 @@
 <body class="min-h-screen p-6">
     <div id="app" class="max-w-7xl mx-auto">
         <div class="bg-white rounded-lg shadow-lg p-6 mb-6">
-            <h1 class="text-3xl font-bold text-rose-700 mb-2">
-                🌹 Florexport Shalom
-            </h1>
-            <p class="text-gray-600">Control de Rendimiento de Embonchadores</p>
+            <div class="flex items-center gap-6">
+                <img src="logo.png" alt="Florexport Shalom" style="max-width: 250px; height: auto;">
+                <div class="flex-1">
+                    <h1 class="text-3xl font-bold text-rose-700 mb-2">
+                        Control de Rendimiento de Embonchadores
+                    </h1>
+                    <p class="text-gray-600">Sistema de Control de Inventario</p>
+                </div>
+            </div>
         </div>
 
         <div class="flex gap-4 mb-6">
@@ -162,7 +167,7 @@
 
     <script>
         const empleados = [
-            { id: 1, nombre: "Maria Odilia Coj Paz", mesa: 1, clasificadora: "Clasificadora 1" },
+            { id: 1, nombre: "Maria Lucia", mesa: 1, clasificadora: "Clasificadora 1" },
             { id: 2, nombre: "Anabelia Arana Guerra", mesa: 2, clasificadora: "Clasificadora 2" },
             { id: 3, nombre: "Claudia Camey", mesa: 3, clasificadora: "Clasificadora 3" },
             { id: 4, nombre: "Fidelia Aracely Chávez Quel", mesa: 4, clasificadora: "Clasificadora 4" },
@@ -307,6 +312,7 @@
             };
 
             registros.push(registro);
+            localStorage.setItem('registros', JSON.stringify(registros));
 
             // Limpiar formulario
             document.getElementById('cantidad').value = '';
