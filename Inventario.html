@@ -7,6 +7,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     <style>
         body {
             background: linear-gradient(135deg, #fce7f3 0%, #ffe4e6 100%);
@@ -29,8 +30,8 @@
             <button onclick="cambiarVista('estadisticas')" id="btnEstadisticas" class="px-6 py-3 rounded-lg font-semibold transition bg-white text-rose-600 hover:bg-rose-50">
                 📊 Estadísticas
             </button>
-            <button onclick="exportarCSV()" class="ml-auto px-6 py-3 bg-green-600 text-white rounded-lg font-semibold hover:bg-green-700 transition">
-                💾 Exportar CSV
+            <button onclick="exportarExcel()" class="ml-auto px-6 py-3 bg-green-600 text-white rounded-lg font-semibold hover:bg-green-700 transition">
+                💾 Exportar Excel
             </button>
             <button onclick="exportarPDF()" class="px-6 py-3 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition">
                 📄 Exportar PDF
@@ -383,27 +384,27 @@
                     });
 
                     const totalHoras = Object.values(horasPorDia).reduce((sum, h) => sum + h, 0);
-                    const fecha = fechasUnicas;
                     const diasTrabajados = fechasUnicas.length;
                     const promedioHorasDia = diasTrabajados > 0 ? (totalHoras / diasTrabajados).toFixed(1) : 0;
                     const promedioBonchesPorHora = totalHoras > 0 ? (totalBonches / totalHoras).toFixed(1) : 0;
 
                     estadisticas[emp.id] = {
-                        nombre: emp.nombre,
-                        claificadora: emp.clasificadora,
-                        mesa: emp.mesa,
-                        totalBonches,
-                        fecha,
-                        diasTrabajados,
-                        totalHoras,
-                        promedioHorasDia,
-                        promedioBonchesPorHora
-                    };
+                    mesa: emp.mesa,
+                    nombre: emp.nombre,
+                    clasificadora: emp.clasificadora || '—',
+                    totalBonches,
+                    fechas: fechasUnicas.join(', '), // 👈 muestra las fechas exactas
+                    diasTrabajados,
+                    totalHoras,
+                    promedioHorasDia,
+                    promedioBonchesPorHora
+                };
                 }
             });
 
             return estadisticas;
         }
+
 
         function actualizarEstadisticas() {
             const tbody = document.getElementById('tablaEstadisticas');
@@ -425,13 +426,13 @@
                 <tr class="${idx % 2 === 0 ? 'bg-white' : 'bg-gray-50'}">
                     <td class="px-4 py-3 text-sm font-semibold">${stat.mesa}</td>
                     <td class="px-4 py-3 text-sm">${stat.nombre}</td>
-                    <td class="px-4 py-3 text-sm text-gray-600">${stat.claificadora}</td>
+                    <td class="px-4 py-3 text-sm text-gray-600">${stat.clasificadora}</td>
                     <td class="px-4 py-3 text-sm">
                         <span class="bg-rose-100 text-rose-700 px-3 py-1 rounded-full font-semibold">
                             ${stat.totalBonches}
                         </span>
                     </td>
-                    <td class="px-4 py-3 text-sm">${stat.fecha}</td>
+                    <td class="px-4 py-3 text-sm">${stat.fechas}</td>
                     <td class="px-4 py-3 text-sm">${stat.diasTrabajados}</td>
                     <td class="px-4 py-3 text-sm">${stat.totalHoras}</td>
                     <td class="px-4 py-3 text-sm">${stat.promedioHorasDia}</td>
@@ -461,42 +462,35 @@
             }
         }
 
-        function exportarPDF() {
+            function exportarPDF() {
             if (registros.length === 0) {
                 alert('No hay registros para exportar');
                 return;
             }
 
             const { jsPDF } = window.jspdf;
-            const doc = new jsPDF('l', 'mm', 'a4'); // landscape, milímetros, tamaño A4
-            
-            const fechaActual = new Date().toLocaleDateString('es-GT', { 
-                day: 'numeric',
-                month: 'long', 
-                year: 'numeric' 
-            });
+            const doc = new jsPDF('l', 'mm', 'a4'); // landscape, milímetros, A4
+            const fechaActual = new Date().toLocaleDateString('es-GT', { day: 'numeric', month: 'long', year: 'numeric' });
 
-            // CONFIGURACIÓN DE COLORES
+            // 🎨 COLORES
             const colorPrimario = [225, 29, 72]; // Rose
-            const colorSecundario = [252, 231, 243]; // Rose claro
-            const colorTexto = [31, 41, 55]; // Gris oscuro
+            const colorSecundario = [252, 231, 243];
+            const colorTexto = [31, 41, 55];
 
-            // ENCABEZADO
+            // 🏷️ ENCABEZADO
             doc.setFillColor(...colorPrimario);
             doc.rect(0, 0, 297, 35, 'F');
-            
             doc.setTextColor(255, 255, 255);
             doc.setFontSize(22);
             doc.setFont(undefined, 'bold');
             doc.text('REPORTE DE PRODUCCIÓN DE BONCHES DE ROSAS', 148.5, 15, { align: 'center' });
-            
             doc.setFontSize(12);
             doc.setFont(undefined, 'normal');
             doc.text(`Fecha de Reporte: ${fechaActual}`, 148.5, 25, { align: 'center' });
 
             let yPos = 45;
 
-            // SECCIÓN 1: REGISTROS DETALLADOS
+            // 🧾 SECCIÓN 1: REGISTROS DETALLADOS
             doc.setTextColor(...colorTexto);
             doc.setFontSize(14);
             doc.setFont(undefined, 'bold');
@@ -513,10 +507,10 @@
                 r.hora,
                 r.mesa,
                 r.nombre,
-                r.clasificadora,
-                r.variedad,
-                r.tamanio,
-                r.empaque,
+                r.clasificadora || '-',
+                r.variedad || '-',
+                r.tamanio || '-',
+                r.empaque || '-',
                 r.cantidad,
                 r.observaciones || '-'
             ]);
@@ -538,32 +532,30 @@
                     cellPadding: 2
                 },
                 columnStyles: {
-                    0: { halign: 'center', cellWidth: 22 },
+                    0: { halign: 'center', cellWidth: 20 },
                     1: { halign: 'center', cellWidth: 25 },
-                    2: { halign: 'center', cellWidth: 8 },
-                    3: { halign: 'left', cellWidth: 45 },
-                    4: { halign: 'left', cellWidth: 40 },
+                    2: { halign: 'center', cellWidth: 10 },
+                    3: { halign: 'center', cellWidth: 45 },
+                    4: { halign: 'center', cellWidth: 40 },
                     5: { halign: 'center', cellWidth: 25 },
                     6: { halign: 'center', cellWidth: 18 },
                     7: { halign: 'center', cellWidth: 25 },
                     8: { halign: 'center', cellWidth: 15, fontStyle: 'bold' },
-                    9: { halign: 'left', cellWidth: 50, fontSize: 6 }
+                    9: { halign: 'center', cellWidth: 50, fontSize: 6 }
                 },
                 alternateRowStyles: { fillColor: colorSecundario }
             });
 
-            const totalBonchesGeneral = registros.reduce((sum, r) => sum + r.cantidad, 0);
+            const totalBonchesGeneral = registros.reduce((sum, r) => sum + (r.cantidad || 0), 0);
             yPos = doc.lastAutoTable.finalY + 5;
-            
             doc.setFontSize(11);
             doc.setFont(undefined, 'bold');
             doc.text(`TOTAL GENERAL DE BONCHES: ${totalBonchesGeneral}`, 14, yPos);
 
-            // NUEVA PÁGINA PARA ESTADÍSTICAS
+            // 📊 NUEVA PÁGINA: ESTADÍSTICAS
             doc.addPage();
             yPos = 20;
 
-            // SECCIÓN 2: RESUMEN POR EMPLEADO
             doc.setFontSize(14);
             doc.text('RESUMEN DE PRODUCCIÓN POR EMPLEADO', 14, yPos);
             yPos += 3;
@@ -574,11 +566,11 @@
             const dataEstadisticas = statsOrdenados.map(s => [
                 s.mesa,
                 s.nombre,
-                s.clasificadora,
+                s.clasificadora || '—',
                 s.totalBonches,
-                s.fechasTrabajadas,
+                s.fechas, // 👈 aquí mostramos las fechas reales
+                s.diasTrabajados,
                 s.totalHoras,
-                s.promedioHorasDia,
                 s.promedioBonchesPorHora
             ]);
 
@@ -600,34 +592,39 @@
                 },
                 columnStyles: {
                     0: { halign: 'center', cellWidth: 15 },
-                    1: { halign: 'left', cellWidth: 60 },
-                    2: { halign: 'left', cellWidth: 60 },
-                    3: { halign: 'center', cellWidth: 25, fontStyle: 'bold' },
-                    4: { halign: 'center', cellWidth: 70, fontSize: 7 },
-                    5: { halign: 'center', cellWidth: 20 },
-                    6: { halign: 'center', cellWidth: 25 },
-                    7: { halign: 'center', cellWidth: 25, fontStyle: 'bold', textColor: [22, 163, 74] }
+                    1: { halign: 'center', cellWidth: 80 },
+                    2: { halign: 'center', cellWidth: 80 },
+                    3: { halign: 'center', cellWidth: 20, fontStyle: 'bold' },
+                    4: { halign: 'center', cellWidth: 20, fontSize: 7 },
+                    5: { halign: 'center', cellWidth: 15 },
+                    6: { halign: 'center', cellWidth: 20 },
+                    7: { halign: 'center', cellWidth: 20, fontStyle: 'bold', textColor: [22, 163, 74] }
                 },
                 alternateRowStyles: { fillColor: colorSecundario }
             });
 
-            // TOTALES
             const totalEmpleados = statsOrdenados.length;
+            const clasificadorasUnicas = statsOrdenados
+                .map(s => s.clasificadora)
+                .filter(c => c && c.trim() !== ''); // elimina vacíos o nulos
+            const totalClasificadoras = new Set(clasificadorasUnicas).size;
             const totalHorasRegistradas = statsOrdenados.reduce((sum, s) => sum + s.totalHoras, 0);
-            const promedioGeneralBonches = totalHorasRegistradas > 0 
-                ? (totalBonchesGeneral / totalHorasRegistradas).toFixed(1) : '0.0';
+            const promedioGeneralBonches = totalHorasRegistradas > 0 ? (totalBonchesGeneral / totalHorasRegistradas).toFixed(1) : '0.0';
 
             yPos = doc.lastAutoTable.finalY + 8;
-            
             doc.setFillColor(...colorSecundario);
             doc.rect(14, yPos - 5, 270, 15, 'F');
-            
             doc.setTextColor(...colorPrimario);
             doc.setFontSize(11);
             doc.setFont(undefined, 'bold');
-            doc.text(`TOTALES: ${totalEmpleados} empleados  | ${totalClasificadoras} clasificadoras  |  ${totalBonchesGeneral} bonches  |  ${totalHorasRegistradas} horas  |  ${promedioGeneralBonches} bonches/hora promedio`, 148.5, yPos + 2, { align: 'center' });
+            doc.text(
+                `TOTALES: ${totalEmpleados} empleados  |  ${totalClasificadoras} clasificadoras  |  ${totalBonchesGeneral} bonches  |  ${totalHorasRegistradas} horas  |  ${promedioGeneralBonches} bonches/hora promedio`,
+                148.5,
+                yPos + 2,
+                { align: 'center' }
+            );
 
-            // SECCIÓN 3: TOP 5 PRODUCTORES
+            // 🥇 SECCIÓN 3: TOP 5 PRODUCTORES
             yPos += 25;
             doc.setTextColor(...colorTexto);
             doc.setFontSize(14);
@@ -635,59 +632,38 @@
             yPos += 3;
 
             const top5 = [...statsOrdenados].sort((a, b) => b.totalBonches - a.totalBonches).slice(0, 5);
-            
             const dataTop5 = top5.map((s, idx) => [
                 `${idx + 1}°`,
                 s.mesa,
                 s.nombre,
+                s.clasificadora, 
                 s.totalBonches,
                 s.promedioBonchesPorHora
             ]);
 
             doc.autoTable({
                 startY: yPos,
-                head: [['Pos.', 'Mesa', 'Nombre', 'Total Bonches', 'Prom. Bonches/Hora']],
+                head: [['Pos.', 'Mesa', 'Nombre', 'Clasificadora', 'Total Bonches', 'Prom. Bonches/Hora']],
                 body: dataTop5,
                 theme: 'grid',
                 headStyles: { 
-                    fillColor: [234, 179, 8], // Amarillo/oro
+                    fillColor: [234, 179, 8],
                     textColor: [255, 255, 255],
                     fontStyle: 'bold',
                     halign: 'center'
                 },
-                styles: { 
-                    fontSize: 10,
-                    cellPadding: 4
-                },
+                styles: { fontSize: 10, cellPadding: 4 },
                 columnStyles: {
                     0: { halign: 'center', cellWidth: 20, fontStyle: 'bold', fontSize: 12 },
                     1: { halign: 'center', cellWidth: 20 },
-                    2: { halign: 'left', cellWidth: 120 },
-                    3: { halign: 'center', cellWidth: 35, fontStyle: 'bold', textColor: colorPrimario },
-                    4: { halign: 'center', cellWidth: 40, fontStyle: 'bold', textColor: [22, 163, 74] }
-                },
-                didDrawCell: (data) => {
-                    if (data.section === 'body' && data.column.index === 0) {
-                        const row = data.row.index;
-                        if (row === 0) {
-                            doc.setFillColor(255, 215, 0); // Oro
-                        } else if (row === 1) {
-                            doc.setFillColor(192, 192, 192); // Plata
-                        } else if (row === 2) {
-                            doc.setFillColor(205, 127, 50); // Bronce
-                        }
-                        if (row < 3) {
-                            doc.rect(data.cell.x, data.cell.y, data.cell.width, data.cell.height, 'F');
-                            doc.setTextColor(255, 255, 255);
-                            doc.setFontSize(12);
-                            doc.setFont(undefined, 'bold');
-                            doc.text(data.cell.text[0], data.cell.x + data.cell.width / 2, data.cell.y + data.cell.height / 2 + 2, { align: 'center' });
-                        }
-                    }
+                    2: { halign: 'center', cellWidth: 80 },
+                    3: { halign: 'center', cellWidth: 80 },
+                    4: { halign: 'center', cellWidth: 30, fontStyle: 'bold', textColor: colorPrimario },
+                    5: { halign: 'center', cellWidth: 40, fontStyle: 'bold', textColor: [22, 163, 74] }
                 }
             });
 
-            // PIE DE PÁGINA
+            // 📄 PIE DE PÁGINA
             const pageCount = doc.internal.getNumberOfPages();
             for (let i = 1; i <= pageCount; i++) {
                 doc.setPage(i);
@@ -697,30 +673,40 @@
                 doc.text('Sistema de Inventario de Bonches - Generado automáticamente', 148.5, 205, { align: 'center' });
             }
 
-            // GUARDAR PDF
-            doc.save(`Reporte_Bonches_${fechaActual}.pdf`);
+            doc.save(`Reporte_Bonches_${new Date().toISOString().split('T')[0]}.pdf`);
         }
 
-        function exportarCSV() {
+        function exportarExcel() {
             if (registros.length === 0) {
                 alert('No hay registros para exportar');
                 return;
             }
 
             const fechaActual = new Date().toLocaleDateString('es-GT');
-            let csv = '\uFEFF'; // BOM para UTF-8
-            
-            // ENCABEZADO PRINCIPAL
-            csv += '═══════════════════════════════════════════════════════════════════════════════\n';
-            csv += '                    REPORTE DE PRODUCCIÓN DE BONCHES DE ROSAS\n';
-            csv += `                              Fecha de Reporte: ${fechaActual}\n`;
-            csv += '═══════════════════════════════════════════════════════════════════════════════\n\n';
+            const stats = calcularEstadisticas();
+            const statsOrdenados = Object.values(stats).sort((a, b) => a.mesa - b.mesa);
 
+            // Crear libro y hoja
+            const wb = XLSX.utils.book_new();
+            const ws_data = [];
+
+            // ==============================
+            // ENCABEZADO PRINCIPAL
+            // ==============================
+            ws_data.push(['═══════════════════════════════════════════════════════════════════════════════']);
+            ws_data.push(['REPORTE DE PRODUCCIÓN DE BONCHES DE ROSAS']);
+            ws_data.push([`Fecha de Reporte: ${fechaActual}`]);
+            ws_data.push(['═══════════════════════════════════════════════════════════════════════════════']);
+            ws_data.push(['']); // línea en blanco
+
+            // ==============================
             // SECCIÓN 1: REGISTROS DETALLADOS
-            csv += '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n';
-            csv += '                           REGISTROS HORA POR HORA\n';
-            csv += '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n';
-            csv += 'Fecha,Hora,Mesa,Nombre del Empleado,Cantidad de Bonches\n';
+            // ==============================
+            ws_data.push(['━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━']);
+            ws_data.push(['REGISTROS HORA POR HORA']);
+            ws_data.push(['━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━']);
+            ws_data.push(['']); 
+            ws_data.push(['Fecha', 'Hora', 'Mesa', 'Nombre del Empleado', 'Cantidad de Bonches']);
 
             const registrosOrdenados = [...registros].sort((a, b) => {
                 if (a.fecha !== b.fecha) return a.fecha.localeCompare(b.fecha);
@@ -728,61 +714,107 @@
             });
 
             registrosOrdenados.forEach(r => {
-                csv += `${r.fecha},${r.hora},${r.mesa},"${r.nombre}",${r.cantidad}\n`;
+                ws_data.push([r.fecha, r.hora, r.mesa, r.nombre, r.cantidad]);
             });
 
             const totalBonchesGeneral = registros.reduce((sum, r) => sum + r.cantidad, 0);
-            csv += '\n';
-            csv += `,,,,\n`;
-            csv += `,,,TOTAL GENERAL:,${totalBonchesGeneral}\n`;
+            ws_data.push(['']);
+            ws_data.push(['', '', '', 'TOTAL GENERAL:', totalBonchesGeneral]);
+            ws_data.push(['']);
 
+            // ==============================
             // SECCIÓN 2: RESUMEN POR EMPLEADO
-            csv += '\n\n';
-            csv += '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n';
-            csv += '                        RESUMEN DE PRODUCCIÓN POR EMPLEADO\n';
-            csv += '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n';
-            csv += 'Mesa,Nombre del Empleado,Total Bonches,Días Trabajados,Total Horas Registradas,Promedio Horas por Día,Promedio Bonches por Hora\n';
+            // ==============================
+            ws_data.push(['━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━']);
+            ws_data.push(['RESUMEN DE PRODUCCIÓN POR EMPLEADO']);
+            ws_data.push(['━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━']);
+            ws_data.push(['']);
+            ws_data.push([
+                'Mesa',
+                'Nombre del Empleado',
+                'Clasificadora',
+                'Total Bonches',
+                'Días Trabajados',
+                'Total Horas Registradas',
+                'Promedio Horas por Día',
+                'Promedio Bonches por Hora'
+            ]);
 
-            const stats = calcularEstadisticas();
-            const statsOrdenados = Object.values(stats).sort((a, b) => a.mesa - b.mesa);
-            
             statsOrdenados.forEach(s => {
-                csv += `${s.mesa},"${s.nombre}",${s.totalBonches},${s.diasTrabajados},${s.totalHoras},${s.promedioHorasDia},${s.promedioBonchesPorHora}\n`;
+                ws_data.push([
+                    s.mesa,
+                    s.nombre,
+                    s.clasificadora || '',
+                    s.totalBonches,
+                    s.diasTrabajados,
+                    s.totalHoras,
+                    s.promedioHorasDia,
+                    s.promedioBonchesPorHora
+                ]);
             });
 
-            // TOTALES DEL RESUMEN
             const totalEmpleados = statsOrdenados.length;
             const totalDiasTrabajados = statsOrdenados.reduce((sum, s) => sum + s.diasTrabajados, 0);
             const totalHorasRegistradas = statsOrdenados.reduce((sum, s) => sum + s.totalHoras, 0);
             const promedioGeneralBonches = totalHorasRegistradas > 0 ? (totalBonchesGeneral / totalHorasRegistradas).toFixed(1) : 0;
 
-            csv += '\n';
-            csv += `TOTALES:,${totalEmpleados} empleados,${totalBonchesGeneral} bonches,,${totalHorasRegistradas} horas,,${promedioGeneralBonches} bonches/hora\n`;
+            ws_data.push(['']);
+            ws_data.push([
+                'TOTALES:',
+                `${totalEmpleados} empleados`,
+                '',
+                `${totalBonchesGeneral} bonches`,
+                `${totalDiasTrabajados} días`,
+                `${totalHorasRegistradas} horas`,
+                '',
+                `${promedioGeneralBonches} bonches/hora`
+            ]);
+            ws_data.push(['']);
 
+            // ==============================
             // SECCIÓN 3: TOP PRODUCTORES
-            csv += '\n\n';
-            csv += '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n';
-            csv += '                            TOP 5 PRODUCTORES\n';
-            csv += '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n';
-            csv += 'Posición,Mesa,Nombre,Total Bonches,Promedio por Hora\n';
+            // ==============================
+            ws_data.push(['━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━']);
+            ws_data.push(['TOP 5 PRODUCTORES']);
+            ws_data.push(['━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━']);
+            ws_data.push(['']);
+            ws_data.push(['Posición', 'Mesa', 'Nombre', 'Total Bonches', 'Promedio por Hora']);
 
             const top5 = [...statsOrdenados].sort((a, b) => b.totalBonches - a.totalBonches).slice(0, 5);
             top5.forEach((s, idx) => {
-                csv += `${idx + 1},${s.mesa},"${s.nombre}",${s.totalBonches},${s.promedioBonchesPorHora}\n`;
+                ws_data.push([idx + 1, s.mesa, s.nombre, s.totalBonches, s.promedioBonchesPorHora]);
             });
 
+            // ==============================
             // PIE DE PÁGINA
-            csv += '\n\n';
-            csv += '═══════════════════════════════════════════════════════════════════════════════\n';
-            csv += '                    Fin del Reporte - Sistema de Inventario de Bonches\n';
-            csv += '═══════════════════════════════════════════════════════════════════════════════\n';
+            // ==============================
+            ws_data.push(['']);
+            ws_data.push(['═══════════════════════════════════════════════════════════════════════════════']);
+            ws_data.push(['Fin del Reporte - Sistema de Inventario de Bonches']);
+            ws_data.push(['═══════════════════════════════════════════════════════════════════════════════']);
 
-            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-            const link = document.createElement('a');
-            link.href = URL.createObjectURL(blob);
-            link.download = `Reporte_Bonches_${new Date().toISOString().split('T')[0]}.csv`;
-            link.click();
-        }
+            // ==============================
+            // CREAR HOJA Y FORMATO
+            // ==============================
+            const ws = XLSX.utils.aoa_to_sheet(ws_data);
+
+            // Ajustar ancho de columnas
+            ws['!cols'] = [
+                { wch: 10 },
+                { wch: 20 },
+                { wch: 20 },
+                { wch: 28 },
+                { wch: 15 },
+                { wch: 15 },
+                { wch: 20 },
+                { wch: 22 }
+            ];
+
+            XLSX.utils.book_append_sheet(wb, ws, 'Reporte Producción');
+
+            const fechaArchivo = new Date().toISOString().split('T')[0];
+            XLSX.writeFile(wb, `Reporte_Bonches_${fechaArchivo}.xlsx`);
+        }        
 
         inicializar();
     </script>

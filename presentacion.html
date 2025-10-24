@@ -1,0 +1,1343 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Presentación PowerPoint - Cotizaciones</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Calibri', 'Arial', sans-serif;
+            background: #2b2b2b;
+            padding: 20px;
+        }
+        
+        .controls {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+        }
+        
+        .controls button {
+            background: #0078d4;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            margin: 5px;
+        }
+        
+        .controls button:hover {
+            background: #005a9e;
+        }
+        
+        .slide-container {
+            max-width: 960px;
+            margin: 0 auto;
+            background: white;
+        }
+        
+        .slide {
+            width: 960px;
+            height: 540px;
+            background: white;
+            margin: 20px auto;
+            padding: 40px 60px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+            position: relative;
+            page-break-after: always;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .slide-number {
+            position: absolute;
+            bottom: 15px;
+            right: 30px;
+            color: #666;
+            font-size: 12px;
+        }
+        
+        /* Slide de título */
+        .title-slide {
+            background: linear-gradient(135deg, #0078d4 0%, #00bcf2 100%);
+            color: white;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+        }
+        
+        .title-slide h1 {
+            font-size: 48px;
+            margin-bottom: 20px;
+            font-weight: bold;
+        }
+        
+        .title-slide .subtitle {
+            font-size: 24px;
+            margin-top: 15px;
+        }
+        
+        .title-slide .date {
+            font-size: 18px;
+            margin-top: 30px;
+            opacity: 0.9;
+        }
+        
+        /* Títulos */
+        h1 {
+            color: #0078d4;
+            font-size: 36px;
+            margin-bottom: 25px;
+            border-bottom: 3px solid #0078d4;
+            padding-bottom: 10px;
+        }
+        
+        h2 {
+            color: #2b579a;
+            font-size: 24px;
+            margin: 20px 0 15px 0;
+        }
+        
+        h3 {
+            color: #0078d4;
+            font-size: 20px;
+            margin: 15px 0 10px 0;
+        }
+        
+        /* Tablas */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+            font-size: 13px;
+        }
+        
+        thead {
+            background: #0078d4;
+            color: white;
+        }
+        
+        th {
+            padding: 10px 8px;
+            text-align: left;
+            font-weight: 600;
+            font-size: 13px;
+        }
+        
+        td {
+            padding: 8px;
+            border-bottom: 1px solid #ddd;
+            vertical-align: top;
+        }
+        
+        tbody tr:nth-child(even) {
+            background: #f5f5f5;
+        }
+        
+        .highlight {
+            background: #fff3cd !important;
+            font-weight: 600;
+        }
+        
+        .best-option {
+            background: #d4edda !important;
+            border-left: 3px solid #28a745;
+        }
+        
+        /* Listas */
+        ul, ol {
+            margin: 10px 0 10px 25px;
+            line-height: 1.6;
+        }
+        
+        li {
+            margin: 8px 0;
+            font-size: 15px;
+        }
+        
+        /* Cajas de información */
+        .info-box {
+            background: #e7f3ff;
+            border-left: 4px solid #0078d4;
+            padding: 15px;
+            margin: 15px 0;
+            font-size: 14px;
+        }
+        
+        .warning-box {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            margin: 15px 0;
+            font-size: 14px;
+        }
+        
+        .success-box {
+            background: #d4edda;
+            border-left: 4px solid #28a745;
+            padding: 15px;
+            margin: 15px 0;
+            font-size: 14px;
+        }
+        
+        /* Precios */
+        .price {
+            color: #28a745;
+            font-weight: bold;
+            font-size: 15px;
+        }
+        
+        /* Notas al pie */
+        .footer-note {
+            font-size: 11px;
+            color: #666;
+            font-style: italic;
+            margin-top: auto;
+        }
+        
+        /* Para impresión */
+        @media print {
+            body {
+                background: white;
+                padding: 0;
+            }
+            
+            .controls {
+                display: none;
+            }
+            
+            .slide {
+                margin: 0;
+                box-shadow: none;
+                page-break-after: always;
+            }
+            
+            .slide:last-child {
+                page-break-after: auto;
+            }
+        }
+        
+        /* Ajustes de tamaño */
+        .small-table {
+            font-size: 11px;
+        }
+        
+        .small-table th,
+        .small-table td {
+            padding: 6px 5px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="controls">
+    <div style="margin-bottom: 10px; color: #333; font-weight: bold;">Controles</div>
+    <button onclick="window.print()">📄 Descargar PDF</button>
+    <button onclick="previousSlide()">⬅️ Anterior</button>
+    <button onclick="nextSlide()">➡️ Siguiente</button>
+    <div style="margin-top: 10px; font-size: 12px; color: #666;">
+        Use flechas del teclado para navegar
+    </div>
+</div>
+
+<div class="slide-container">
+
+<!-- SLIDE 1: Portada -->
+<div class="slide title-slide">
+    <h1>COMPARACIÓN DE COTIZACIONES</h1>
+    <div class="subtitle">Sistema de Control de Rendimiento<br>de Embonchadores</div>
+    <div class="date">Octubre 2025</div>
+</div>
+
+<!-- SLIDE 2: Agenda -->
+<div class="slide">
+    <h1>Agenda</h1>
+    <ul style="font-size: 20px; line-height: 2.2;">
+        <li><strong>1. Dominios y Correos Electrónicos</strong>
+            <ul style="font-size: 16px; margin-top: 10px;">
+                <li>15 usuarios</li>
+                <li>Comparación de proveedores</li>
+            </ul>
+        </li>
+        <li><strong>2. Servidor Web</strong>
+            <ul style="font-size: 16px; margin-top: 10px;">
+                <li>5 usuarios concurrentes</li>
+                <li>Sistema HTML</li>
+            </ul>
+        </li>
+        <li><strong>3. Laptop de Operación</strong>
+            <ul style="font-size: 16px; margin-top: 10px;">
+                <li>Precios actuales Guatemala</li>
+                <li>Especificaciones recomendadas</li>
+            </ul>
+        </li>
+    </ul>
+    <div class="slide-number">2</div>
+</div>
+
+<!-- SLIDE 3: Correos - Comparación -->
+<div class="slide">
+    <h1>1. Correos Corporativos - Comparación</h1>
+    
+    <table>
+        <thead>
+            <tr>
+                <th>Proveedor</th>
+                <th>$/Usuario/Mes</th>
+                <th>Almacenamiento</th>
+                <th>Características</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><strong>Hostinger Mail</strong></td>
+                <td class="price">$0.99</td>
+                <td>10 GB</td>
+                <td>Webmail, filtro spam</td>
+            </tr>
+            <tr>
+                <td><strong>Zoho Mail</strong></td>
+                <td class="price">$1.00</td>
+                <td>10 GB</td>
+                <td>Apps básicas</td>
+            </tr>
+            <tr>
+                <td><strong>Titan</strong></td>
+                <td class="price">$5.00</td>
+                <td>30 GB</td>
+                <td>Integración Outlook</td>
+            </tr>
+            <tr>
+                <td><strong>Microsoft 365</strong></td>
+                <td class="price">$6.00</td>
+                <td>50 GB</td>
+                <td>Office completo + Teams</td>
+            </tr>
+            <tr class="best-option">
+                <td><strong>Google Workspace</strong></td>
+                <td class="price">$7.20</td>
+                <td>30 GB</td>
+                <td>Gmail + Drive + Meet + Docs</td>
+            </tr>
+        </tbody>
+    </table>
+    
+    <div class="footer-note">Precios actualizados octubre 2025</div>
+    <div class="slide-number">3</div>
+</div>
+
+<!-- SLIDE 4: Correos - Costo Total -->
+<div class="slide">
+    <h1>Costo Total - Correos (15 usuarios)</h1>
+    
+    <table>
+        <thead>
+            <tr>
+                <th style="width: 25%;">Proveedor</th>
+                <th style="width: 20%;">Mensual</th>
+                <th style="width: 20%;">Anual</th>
+                <th style="width: 35%;">Incluye</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><strong>Hostinger</strong></td>
+                <td class="price">$14.85</td>
+                <td class="price">$178.20</td>
+                <td>Solo correo</td>
+            </tr>
+            <tr>
+                <td><strong>Zoho Mail</strong></td>
+                <td class="price">$15.00</td>
+                <td class="price">$180.00</td>
+                <td>Correo + apps básicas</td>
+            </tr>
+            <tr>
+                <td><strong>Titan</strong></td>
+                <td class="price">$75.00</td>
+                <td class="price">$900.00</td>
+                <td>Correo profesional</td>
+            </tr>
+            <tr>
+                <td><strong>Microsoft 365</strong></td>
+                <td class="price">$90.00</td>
+                <td class="price">$1,080.00</td>
+                <td>Office + Teams + correo</td>
+            </tr>
+            <tr class="best-option">
+                <td><strong>Google Workspace</strong></td>
+                <td class="price">$108.00</td>
+                <td class="price">$1,296.00</td>
+                <td>Suite Google completa</td>
+            </tr>
+        </tbody>
+    </table>
+    
+    <div class="info-box">
+        <strong>Dominio:</strong> Agregar $10-15 USD/año para .com o $30 USD/año para .com.gt
+    </div>
+    
+    <div class="footer-note">Para 15 usuarios. Cálculo: precio/usuario × 15 × 12 meses</div>
+    <div class="slide-number">4</div>
+</div>
+
+<!-- SLIDE 5: Correos - Recomendación -->
+<div class="slide">
+    <h1>Recomendación: Correos</h1>
+    
+    <div class="success-box">
+        <h2 style="margin-top: 0;">Opción Recomendada: Google Workspace</h2>
+        <p style="font-size: 16px; margin: 10px 0;"><strong>Costo:</strong> <span class="price">$1,296 USD/año</span> + dominio ($15) = <span class="price">$1,311 USD/año</span></p>
+        <p style="font-size: 16px;"><strong>En Quetzales:</strong> ~Q10,160/año (Q847/mes)</p>
+    </div>
+    
+    <h3>¿Por qué Google Workspace?</h3>
+    <ul>
+        <li>✅ Gmail profesional (interfaz conocida y confiable)</li>
+        <li>✅ Google Drive: 30GB por usuario (450GB total)</li>
+        <li>✅ Google Meet: videollamadas hasta 100 participantes</li>
+        <li>✅ Google Docs, Sheets, Slides (trabajo colaborativo)</li>
+        <li>✅ Google Calendar compartido</li>
+        <li>✅ Soporte 24/7</li>
+        <li>✅ Seguridad de clase empresarial</li>
+    </ul>
+    
+    <div class="warning-box">
+        <strong>Alternativa Económica:</strong> Hostinger Mail ($178/año + $15 dominio = $193/año) pero solo incluye correo básico, sin herramientas de productividad.
+    </div>
+    
+    <div class="slide-number">5</div>
+</div>
+
+<!-- SLIDE 6: Servidor - Introducción -->
+<div class="slide">
+    <h1>2. Servidor Web</h1>
+    
+    <h3>Características del Sistema:</h3>
+    <ul style="font-size: 16px;">
+        <li>Sistema HTML/JavaScript (archivos estáticos)</li>
+        <li><strong>5 usuarios concurrentes</strong></li>
+        <li>Control de inventario y rendimiento</li>
+        <li>Almacenamiento de datos (localStorage)</li>
+    </ul>
+    
+    <h3 style="margin-top: 20px;">Opciones de Hosting:</h3>
+    <table style="margin-top: 15px;">
+        <thead>
+            <tr>
+                <th>Tipo</th>
+                <th>Ventajas</th>
+                <th>Recomendado Para</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr class="best-option">
+                <td><strong>Hosting Compartido</strong></td>
+                <td>Económico, fácil de usar</td>
+                <td>Sistemas pequeños (5-20 usuarios)</td>
+            </tr>
+            <tr>
+                <td><strong>VPS</strong></td>
+                <td>Más control, mejor rendimiento</td>
+                <td>Sistemas con crecimiento</td>
+            </tr>
+        </tbody>
+    </table>
+    
+    <div class="info-box">
+        Para 5 usuarios concurrentes con sistema HTML, <strong>Hosting Compartido es suficiente</strong> y la opción más económica.
+    </div>
+    
+    <div class="slide-number">6</div>
+</div>
+
+<!-- SLIDE 7: Servidor - Comparación -->
+<div class="slide">
+    <h1>Comparación de Servidores</h1>
+    
+    <h2>Hosting Compartido (Recomendado)</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Proveedor</th>
+                <th>$/Mes</th>
+                <th>Almacenamiento</th>
+                <th>Características</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr class="best-option">
+                <td><strong>Hostinger Premium</strong></td>
+                <td class="price">$2.99</td>
+                <td>100 GB SSD</td>
+                <td>SSL gratis, backups, 100 sitios</td>
+            </tr>
+            <tr>
+                <td><strong>Hostinger Business</strong></td>
+                <td class="price">$3.99</td>
+                <td>200 GB SSD</td>
+                <td>Email gratis, CDN, backups diarios</td>
+            </tr>
+            <tr>
+                <td><strong>Bluehost</strong></td>
+                <td class="price">$5.95</td>
+                <td>40 GB SSD</td>
+                <td>SSL, dominio gratis 1er año</td>
+            </tr>
+        </tbody>
+    </table>
+    
+    <h2 style="margin-top: 20px;">VPS (Si necesita escalar)</h2>
+    <table class="small-table">
+        <thead>
+            <tr>
+                <th>Proveedor</th>
+                <th>$/Mes</th>
+                <th>CPU/RAM</th>
+                <th>Almacenamiento</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><strong>Hostinger VPS</strong></td>
+                <td class="price">$5.99</td>
+                <td>1 Core / 4GB</td>
+                <td>50 GB SSD</td>
+            </tr>
+        </tbody>
+    </table>
+    
+    <div class="slide-number">7</div>
+</div>
+
+<!-- SLIDE 8: Servidor - Recomendación -->
+<div class="slide">
+    <h1>Recomendación: Servidor</h1>
+    
+    <div class="success-box">
+        <h2 style="margin-top: 0;">Hostinger Premium - Hosting Compartido</h2>
+        <p style="font-size: 18px; margin: 10px 0;"><strong>Costo:</strong> <span class="price">$2.99 USD/mes = $35.88 USD/año</span></p>
+        <p style="font-size: 16px;"><strong>En Quetzales:</strong> ~Q278/año (Q23/mes)</p>
+    </div>
+    
+    <h3>Características incluidas:</h3>
+    <ul>
+        <li>✅ 100 GB almacenamiento SSD (suficiente para sistema HTML)</li>
+        <li>✅ Certificado SSL gratis (HTTPS seguro)</li>
+        <li>✅ Backups semanales automáticos</li>
+        <li>✅ Panel de control fácil (hPanel)</li>
+        <li>✅ Soporte 24/7 en español</li>
+        <li>✅ Soporta 5+ usuarios sin problemas</li>
+    </ul>
+    
+    <div class="info-box">
+        <strong>Rendimiento:</strong> Para 5 usuarios concurrentes en sistema HTML, este hosting es más que suficiente. Solo necesitarías VPS si excedes 30+ usuarios o agregas funcionalidad compleja.
+    </div>
+    
+    <div class="slide-number">8</div>
+</div>
+
+<!-- SLIDE 9: Laptops - Especificaciones -->
+<div class="slide">
+    <h1>3. Laptop de Operación</h1>
+    
+    <h3>Especificaciones Recomendadas:</h3>
+    <table>
+        <thead>
+            <tr>
+                <th style="width: 30%;">Componente</th>
+                <th style="width: 35%;">Mínimo</th>
+                <th style="width: 35%;">Recomendado</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><strong>Procesador</strong></td>
+                <td>Intel Core i3 / Ryzen 3</td>
+                <td>Intel Core i5 / Ryzen 5</td>
+            </tr>
+            <tr>
+                <td><strong>RAM</strong></td>
+                <td>8 GB</td>
+                <td>16 GB</td>
+            </tr>
+            <tr>
+                <td><strong>Almacenamiento</strong></td>
+                <td>256 GB SSD</td>
+                <td>512 GB SSD</td>
+            </tr>
+            <tr>
+                <td><strong>Pantalla</strong></td>
+                <td>14" HD</td>
+                <td>15.6" Full HD</td>
+            </tr>
+            <tr>
+                <td><strong>Sistema</strong></td>
+                <td colspan="2">Windows 11</td>
+            </tr>
+        </tbody>
+    </table>
+    
+    <div class="info-box">
+        <strong>Uso:</strong> Navegación web, ingreso de datos, aplicaciones Office, acceso a correo corporativo.
+    </div>
+    
+    <div class="slide-number">9</div>
+</div>
+
+<!-- SLIDE 10: Laptops Guatemala -->
+<div class="slide">
+    <h1>Laptops - Precios Guatemala</h1>
+    
+    <h2>Gama Económica (Q3,000 - Q3,500)</h2>
+    <table class="small-table">
+        <thead>
+            <tr>
+                <th>Modelo</th>
+                <th>Procesador</th>
+                <th>RAM/SSD</th>
+                <th>Precio</th>
+                <th>Tienda</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>HP 15-fc0023la</td>
+                <td>Ryzen 3 7320U</td>
+                <td>8GB/512GB</td>
+                <td class="price">Q3,297</td>
+                <td>Agencias Way</td>
+            </tr>
+            <tr class="best-option">
+                <td>Lenovo IdeaPad Slim 3</td>
+                <td>Core i3-1215U</td>
+                <td>8GB/512GB</td>
+                <td class="price">Q3,297</td>
+                <td>Agencias Way</td>
+            </tr>
+            <tr>
+                <td>HP 15-fd0013la</td>
+                <td>Core i3-N305</td>
+                <td>8GB/256GB</td>
+                <td class="price">Q3,449</td>
+                <td>Kemik</td>
+            </tr>
+        </tbody>
+    </table>
+    
+    <h2>Gama Media (Q3,500 - Q4,300)</h2>
+    <table class="small-table">
+        <thead>
+            <tr>
+                <th>Modelo</th>
+                <th>Procesador</th>
+                <th>RAM/SSD</th>
+                <th>Precio</th>
+                <th>Tienda</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>HP 15-fc0xxx</td>
+                <td>Ryzen 5 7520U</td>
+                <td>8GB/512GB</td>
+                <td class="price">Q3,597</td>
+                <td>Agencias Way</td>
+            </tr>
+            <tr class="best-option">
+                <td>HP Pavilion 15</td>
+                <td>Core i5-1235U</td>
+                <td>16GB/512GB</td>
+                <td class="price">Q3,597</td>
+                <td>Agencias Way</td>
+            </tr>
+            <tr>
+                <td>HP ProBook 450 G8</td>
+                <td>Core i5</td>
+                <td>16GB/512GB</td>
+                <td class="price">Q4,288</td>
+                <td>Kemik</td>
+            </tr>
+        </tbody>
+    </table>
+    
+    <div class="footer-note">Precios vigentes octubre 2025 en Guatemala</div>
+    <div class="slide-number">10</div>
+</div>
+
+<!-- SLIDE 11: Laptops - Recomendación -->
+<div class="slide">
+    <h1>Recomendación: Laptop</h1>
+    
+    <div class="success-box">
+        <h2 style="margin-top: 0;">HP Pavilion 15 con Core i5</h2>
+        <p style="font-size: 18px; margin: 10px 0;"><strong>Precio:</strong> <span class="price">Q3,597</span> (pago único)</p>
+        
+        <h3 style="margin-top: 15px;">Especificaciones:</h3>
+        <ul>
+            <li>Intel Core i5-1235U (10 núcleos)</li>
+            <li><strong>16 GB RAM</strong> - Ideal para multitarea</li>
+            <li>512 GB SSD - Rápido y espacioso</li>
+            <li>Pantalla 15.6" Full HD</li>
+            <li>Windows 11</li>
+        </ul>
+    </div>
+    
+    <h3 style="margin-top: 15px;">¿Por qué esta opción?</h3>
+    <ul style="font-size: 15px;">
+        <li>✅ Mismo precio que opciones con i3 pero con i5 + 16GB RAM</li>
+        <li>✅ Rendimiento superior para uso intensivo</li>
+        <li>✅ Mejor inversión a largo plazo (3-5 años)</li>
+        <li>✅ Marca confiable con buen soporte en Guatemala</li>
+    </ul>
+    
+    <div class="info-box">
+        <strong>Dónde comprar:</strong> Agencias Way - múltiples sucursales en Guatemala<br>
+        Tel: 2310-5555 | www.agenciasway.com
+    </div>
+    
+    <div class="slide-number">11</div>
+</div>
+
+<!-- SLIDE 12: Resumen de Inversión -->
+<div class="slide">
+    <h1>Resumen de Inversión Total</h1>
+    
+    <table>
+        <thead>
+            <tr>
+                <th style="width: 35%;">Concepto</th>
+                <th style="width: 35%;">Opción Seleccionada</th>
+                <th style="width: 30%;">Costo</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><strong>1. Correos (15 usuarios)</strong></td>
+                <td>Google Workspace + Dominio</td>
+                <td class="price">$1,311/año<br>~Q10,160/año</td>
+            </tr>
+            <tr>
+                <td><strong>2. Servidor Web</strong></td>
+                <td>Hostinger Premium</td>
+                <td class="price">$36/año<br>~Q278/año</td>
+            </tr>
+            <tr>
+                <td><strong>3. Laptop</strong></td>
+                <td>HP Pavilion 15 (i5, 16GB)</td>
+                <td class="price">Q3,597<br>(único pago)</td>
+            </tr>
+            <tr class="highlight">
+                <td colspan="2"><strong>INVERSIÓN INICIAL (AÑO 1)</strong></td>
+                <td class="price" style="font-size: 18px;">Q13,035</td>
+            </tr>
+            <tr class="highlight">
+                <td colspan="2"><strong>COSTO ANUAL RECURRENTE<br>(años siguientes)</strong></td>
+                <td class="price" style="font-size: 18px;">Q10,438/año<br>(Q870/mes)</td>
+            </tr>
+        </tbody>
+    </table>
+    
+    <div class="info-box">
+        <strong>Desglose mensual recurrente:</strong><br>
+        • Correos: Q847/mes<br>
+        • Servidor: Q23/mes<br>
+        <strong>Total: Q870/mes</strong>
+    </div>
+    
+    <div class="slide-number">12</div>
+</div>
+
+<!-- SLIDE 13: Comparación Económica -->
+<div class="slide">
+    <h1>Comparación: Económica vs Recomendada</h1>
+    
+    <table class="small-table">
+        <thead>
+            <tr>
+                <th></th>
+                <th>Opción Económica</th>
+                <th>Opción Recomendada</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><strong>Correos</strong></td>
+                <td>Hostinger: Q1,567/año</td>
+                <td class="best-option">Google: Q10,160/año</td>
+            </tr>
+            <tr>
+                <td><strong>Servidor</strong></td>
+                <td colspan="2">Hostinger: Q278/año</td>
+            </tr>
+            <tr>
+                <td><strong>Laptop</strong></td>
+                <td>Lenovo i3: Q3,297</td>
+                <td class="best-option">HP i5: Q3,597</td>
+            </tr>
+            <tr class="highlight">
+                <td><strong>Inversión Año 1</strong></td>
+                <td>Q5,142</td>
+                <td><strong>Q14,035</strong></td>
+            </tr>
+            <tr class="highlight">
+                <td><strong>Recurrente/Año</strong></td>
+                <td>Q1,845</td>
+                <td><strong>Q10,438</strong></td>
+            </tr>
+        </tbody>
+    </table>
+    
+    <div class="warning-box">
+        <strong>Diferencia:</strong> La opción recomendada cuesta Q8,893 más el primer año, pero incluye:<br>
+        • Suite completa de productividad (Google Workspace)<br>
+        • Laptop con doble de RAM y procesador más rápido<br>
+        • Mejor inversión a largo plazo
+    </div>
+    
+    <div class="info-box">
+        <strong>Recomendación:</strong> La opción completa es mejor inversión si el sistema es crítico para operaciones diarias y se usa por 3+ años.
+    </div>
+    
+    <div class="slide-number">13</div>
+</div>
+
+<!-- SLIDE 14: Beneficios Google Workspace -->
+<div class="slide">
+    <h1>Beneficios de Google Workspace</h1>
+    
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; font-size: 14px;">
+        <div class="info-box" style="margin: 0;">
+            <h3 style="margin-top: 0; color: #0078d4;">📧 Gmail Profesional</h3>
+            <ul style="margin: 10px 0 0 20px;">
+                <li>Correo @tuempresa.com</li>
+                <li>Filtro anti-spam avanzado</li>
+                <li>Búsqueda potente</li>
+                <li>App móvil integrada</li>
+            </ul>
+        </div>
+        
+        <div class="info-box" style="margin: 0;">
+            <h3 style="margin-top: 0; color: #0078d4;">☁️ Google Drive</h3>
+            <ul style="margin: 10px 0 0 20px;">
+                <li>30 GB por usuario</li>
+                <li>450 GB total (15 usuarios)</li>
+                <li>Acceso desde cualquier lugar</li>
+                <li>Compartir archivos fácilmente</li>
+            </ul>
+        </div>
+        
+        <div class="info-box" style="margin: 0;">
+            <h3 style="margin-top: 0; color: #0078d4;">📄 Google Docs/Sheets</h3>
+            <ul style="margin: 10px 0 0 20px;">
+                <li>Crear documentos en línea</li>
+                <li>Hojas de cálculo</li>
+                <li>Edición colaborativa</li>
+                <li>Sin instalar Office</li>
+            </ul>
+        </div>
+        
+        <div class="info-box" style="margin: 0;">
+            <h3 style="margin-top: 0; color: #0078d4;">🎥 Google Meet</h3>
+            <ul style="margin: 10px 0 0 20px;">
+                <li>Videollamadas HD</li>
+                <li>Hasta 100 participantes</li>
+                <li>Grabación de reuniones</li>
+                <li>Compartir pantalla</li>
+            </ul>
+        </div>
+    </div>
+    
+    <div class="success-box" style="margin-top: 15px;">
+        <strong>Ventaja clave:</strong> Todo está integrado y funciona junto. Un solo login da acceso a todas las herramientas.
+    </div>
+    
+    <div class="slide-number">14</div>
+</div>
+
+<!-- SLIDE 15: Plan de Implementación -->
+<div class="slide">
+    <h1>Plan de Implementación</h1>
+    
+    <table class="small-table">
+        <thead>
+            <tr>
+                <th style="width: 10%;">Fase</th>
+                <th style="width: 25%;">Actividad</th>
+                <th style="width: 40%;">Tareas</th>
+                <th style="width: 25%;">Tiempo</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><strong>1</strong></td>
+                <td><strong>Correos</strong></td>
+                <td>
+                    • Registrar dominio<br>
+                    • Crear Google Workspace<br>
+                    • Configurar 15 cuentas<br>
+                    • Probar acceso
+                </td>
+                <td>2-3 días</td>
+            </tr>
+            <tr>
+                <td><strong>2</strong></td>
+                <td><strong>Servidor</strong></td>
+                <td>
+                    • Contratar Hostinger<br>
+                    • Subir sistema HTML<br>
+                    • Configurar dominio<br>
+                    • Pruebas de acceso
+                </td>
+                <td>2-3 días</td>
+            </tr>
+            <tr>
+                <td><strong>3</strong></td>
+                <td><strong>Laptop</strong></td>
+                <td>
+                    • Comprar en Agencias Way<br>
+                    • Instalar software<br>
+                    • Configurar correo<br>
+                    • Capacitación usuario
+                </td>
+                <td>2-3 días</td>
+            </tr>
+            <tr class="highlight">
+                <td colspan="3"><strong>TIEMPO TOTAL DE IMPLEMENTACIÓN</strong></td>
+                <td><strong>1 semana</strong></td>
+            </tr>
+        </tbody>
+    </table>
+    
+    <div class="info-box" style="margin-top: 15px;">
+        <strong>Requisitos previos:</strong><br>
+        • Decidir nombre de dominio<br>
+        • Lista de 15 nombres de usuarios para correos<br>
+        • Conexión a internet estable
+    </div>
+    
+    <div class="slide-number">15</div>
+</div>
+
+<!-- SLIDE 16: Donde Comprar -->
+<div class="slide">
+    <h1>Dónde Comprar</h1>
+    
+    <h2>Laptops en Guatemala</h2>
+    <table class="small-table">
+        <thead>
+            <tr>
+                <th>Tienda</th>
+                <th>Contacto</th>
+                <th>Ubicación</th>
+                <th>Ventajas</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr class="best-option">
+                <td><strong>Agencias Way</strong></td>
+                <td>2310-5555<br>agenciasway.com</td>
+                <td>Múltiples sucursales</td>
+                <td>Mejores precios, garantía</td>
+            </tr>
+            <tr>
+                <td><strong>Kemik</strong></td>
+                <td>2366-9595<br>kemik.gt</td>
+                <td>Zona 10, online</td>
+                <td>Variedad, servicio técnico</td>
+            </tr>
+            <tr>
+                <td><strong>Compugreiff</strong></td>
+                <td>compugreiff.com</td>
+                <td>Zona 1 y 10</td>
+                <td>Stock amplio</td>
+            </tr>
+        </tbody>
+    </table>
+    
+    <h2 style="margin-top: 20px;">Servicios en Línea</h2>
+    <ul style="font-size: 15px;">
+        <li><strong>Google Workspace:</strong> workspace.google.com<br>
+            <small>• Registro directo • Pago con tarjeta • Soporte en español</small></li>
+        <li><strong>Hostinger:</strong> hostinger.com<br>
+            <small>• Panel en español • Chat 24/7 • Pago con tarjeta</small></li>
+    </ul>
+    
+    <div class="slide-number">16</div>
+</div>
+
+<!-- SLIDE 17: Consideraciones Técnicas -->
+<div class="slide">
+    <h1>Consideraciones Técnicas</h1>
+    
+    <h3>Sistema HTML en Servidor:</h3>
+    <div class="info-box">
+        <ul style="margin: 5px 0;">
+            <li>✅ <strong>Certificado SSL incluido</strong> - Conexión HTTPS segura</li>
+            <li>✅ <strong>Backups automáticos</strong> - Respaldo semanal incluido</li>
+            <li>✅ <strong>Panel fácil de usar</strong> - Subir archivos con File Manager</li>
+            <li>✅ <strong>5 usuarios concurrentes</strong> - Más que suficiente</li>
+        </ul>
+    </div>
+    
+    <h3 style="margin-top: 15px;">Mejoras Futuras Recomendadas:</h3>
+    <div class="warning-box">
+        <ul style="margin: 5px 0; font-size: 14px;">
+            <li><strong>Base de Datos:</strong> Migrar de localStorage a MySQL para mejor persistencia de datos</li>
+            <li><strong>Sistema de Login:</strong> Autenticación de usuarios para control de acceso</li>
+            <li><strong>Reportes Automáticos:</strong> Exportar datos a Excel/PDF periódicamente</li>
+            <li><strong>Respaldo en la Nube:</strong> Copias adicionales en Google Drive</li>
+            <li><strong>Versión Móvil:</strong> Optimizar para tablets y celulares</li>
+        </ul>
+    </div>
+    
+    <div class="info-box" style="margin-top: 15px; font-size: 14px;">
+        <strong>Nota:</strong> El sistema actual funciona bien para el uso actual. Las mejoras son opcionales y se pueden implementar gradualmente según necesidades.
+    </div>
+    
+    <div class="slide-number">17</div>
+</div>
+
+<!-- SLIDE 18: Costos de Mantenimiento -->
+<div class="slide">
+    <h1>Costos de Mantenimiento Anual</h1>
+    
+    <table>
+        <thead>
+            <tr>
+                <th>Servicio</th>
+                <th>Costo Anual</th>
+                <th>Notas</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><strong>Google Workspace</strong><br>(15 usuarios)</td>
+                <td class="price">Q10,045/año<br>(Q837/mes)</td>
+                <td>Pago mensual o anual<br>Cancelable cuando quieras</td>
+            </tr>
+            <tr>
+                <td><strong>Dominio .com</strong></td>
+                <td class="price">Q116/año</td>
+                <td>Renovación obligatoria anual</td>
+            </tr>
+            <tr>
+                <td><strong>Hostinger Premium</strong></td>
+                <td class="price">Q278/año</td>
+                <td>Puede aumentar tras 1er año<br>(hasta ~Q500/año)</td>
+            </tr>
+            <tr class="highlight">
+                <td><strong>TOTAL ANUAL</strong></td>
+                <td class="price">Q10,438/año<br>(Q870/mes)</td>
+                <td>Costos recurrentes</td>
+            </tr>
+        </tbody>
+    </table>
+    
+    <h3 style="margin-top: 20px;">Otros Costos Opcionales:</h3>
+    <ul style="font-size: 14px;">
+        <li><strong>Soporte Técnico:</strong> Q500-1,000/mes si se contrata externo</li>
+        <li><strong>Mantenimiento Laptop:</strong> Garantía 1 año incluida, después Q200-500/año</li>
+        <li><strong>Actualizaciones Sistema:</strong> Q1,000-3,000 según cambios</li>
+    </ul>
+    
+    <div class="slide-number">18</div>
+</div>
+
+<!-- SLIDE 19: Riesgos y Mitigación -->
+<div class="slide">
+    <h1>Análisis de Riesgos</h1>
+    
+    <table class="small-table">
+        <thead>
+            <tr>
+                <th style="width: 25%;">Riesgo</th>
+                <th style="width: 15%;">Probabilidad</th>
+                <th style="width: 60%;">Mitigación</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>Pérdida de datos</td>
+                <td>Media</td>
+                <td>• Backups automáticos en Hostinger<br>• Exportar datos mensualmente a Drive</td>
+            </tr>
+            <tr>
+                <td>Caída del servidor</td>
+                <td>Baja</td>
+                <td>• Hostinger: 99.9% uptime garantizado<br>• Plan B: copia local del sistema</td>
+            </tr>
+            <tr>
+                <td>Robo/daño laptop</td>
+                <td>Media</td>
+                <td>• Considerar seguro de equipo<br>• Datos en la nube (no se pierden)</td>
+            </tr>
+            <tr>
+                <td>Exceso de usuarios</td>
+                <td>Baja</td>
+                <td>• Monitorear rendimiento mensual<br>• Migrar a VPS si es necesario</td>
+            </tr>
+            <tr>
+                <td>Aumento de precios</td>
+                <td>Alta</td>
+                <td>• Hosting puede duplicar precio tras año 1<br>• Considerar en presupuesto futuro</td>
+            </tr>
+        </tbody>
+    </table>
+    
+    <div class="warning-box" style="margin-top: 15px;">
+        <strong>⚠️ Acción Crítica:</strong> Implementar respaldo mensual de datos del sistema a Google Drive (incluido en Workspace).
+    </div>
+    
+    <div class="slide-number">19</div>
+</div>
+
+<!-- SLIDE 20: Preguntas Frecuentes -->
+<div class="slide">
+    <h1>Preguntas Frecuentes</h1>
+    
+    <div style="font-size: 14px;">
+        <h3>❓ ¿Puedo empezar con lo económico y mejorar después?</h3>
+        <p><strong>Sí.</strong> Puedes comenzar con Hostinger Mail (Q1,567/año) y migrar a Google Workspace después. La laptop también se puede comprar más adelante.</p>
+        
+        <h3 style="margin-top: 15px;">❓ ¿Necesito conocimientos técnicos?</h3>
+        <p><strong>Básicos.</strong> Hostinger tiene panel intuitivo. Para subir el sistema HTML solo necesitas usar el File Manager web (como usar carpetas en Windows).</p>
+        
+        <h3 style="margin-top: 15px;">❓ ¿Qué pasa si necesito más usuarios de correo?</h3>
+        <p><strong>Es flexible.</strong> En Google Workspace pagas solo por usuarios activos. Puedes agregar o quitar usuarios cada mes.</p>
+        
+        <h3 style="margin-top: 15px;">❓ ¿El servidor soportará 5 usuarios simultáneos?</h3>
+        <p><strong>Sí, sin problemas.</strong> Para sistema HTML estático, Hostinger Premium soporta fácilmente 5-20 usuarios concurrentes.</p>
+        
+        <h3 style="margin-top: 15px;">❓ ¿Las laptops tienen garantía?</h3>
+        <p><strong>Sí.</strong> Todas las tiendas ofrecen garantía de 1 año. Algunas ofrecen extensión por costo adicional.</p>
+    </div>
+    
+    <div class="slide-number">20</div>
+</div>
+
+<!-- SLIDE 21: Recomendación Final -->
+<div class="slide">
+    <h1>Recomendación Final</h1>
+    
+    <div class="success-box">
+        <h2 style="margin-top: 0; color: #0078d4;">Configuración Recomendada</h2>
+        
+        <table style="background: transparent; border: none; margin: 15px 0;">
+            <tr>
+                <td style="border: none; padding: 8px 0;"><strong>1. Correos:</strong></td>
+                <td style="border: none; padding: 8px 0;">Google Workspace (15 usuarios)</td>
+                <td style="border: none; padding: 8px 0;" class="price">Q10,160/año</td>
+            </tr>
+            <tr>
+                <td style="border: none; padding: 8px 0;"><strong>2. Servidor:</strong></td>
+                <td style="border: none; padding: 8px 0;">Hostinger Premium</td>
+                <td style="border: none; padding: 8px 0;" class="price">Q278/año</td>
+            </tr>
+            <tr>
+                <td style="border: none; padding: 8px 0;"><strong>3. Laptop:</strong></td>
+                <td style="border: none; padding: 8px 0;">HP Pavilion 15 (i5, 16GB)</td>
+                <td style="border: none; padding: 8px 0;" class="price">Q3,597</td>
+            </tr>
+        </table>
+    </div>
+    
+    <div style="background: #0078d4; color: white; padding: 20px; border-radius: 8px; text-align: center; margin: 20px 0;">
+        <div style="font-size: 18px; margin-bottom: 10px;">INVERSIÓN TOTAL</div>
+        <div style="font-size: 32px; font-weight: bold;">AÑO 1: Q14,035</div>
+        <div style="font-size: 16px; margin-top: 10px;">Años siguientes: Q10,438/año (Q870/mes)</div>
+    </div>
+    
+    <div class="info-box">
+        <strong>Esta configuración ofrece:</strong> Herramientas profesionales, excelente rendimiento, escalabilidad y mejor retorno de inversión a largo plazo.
+    </div>
+    
+    <div class="slide-number">21</div>
+</div>
+
+<!-- SLIDE 22: Próximos Pasos -->
+<div class="slide">
+    <h1>Próximos Pasos</h1>
+    
+    <div style="font-size: 16px; line-height: 1.8;">
+        <h2 style="background: #0078d4; color: white; padding: 12px; margin: 0 -20px 20px -20px;">Acción Inmediata:</h2>
+        
+        <div style="margin-left: 20px;">
+            <p><strong>1️⃣ Aprobar presupuesto</strong></p>
+            <ul style="margin: 5px 0 15px 30px;">
+                <li>Definir configuración final</li>
+                <li>Obtener autorización Q14,035</li>
+            </ul>
+            
+            <p><strong>2️⃣ Comprar laptop (día 1-2)</strong></p>
+            <ul style="margin: 5px 0 15px 30px;">
+                <li>Visitar Agencias Way</li>
+                <li>Verificar stock HP Pavilion 15</li>
+            </ul>
+            
+            <p><strong>3️⃣ Contratar servicios web (día 2-3)</strong></p>
+            <ul style="margin: 5px 0 15px 30px;">
+                <li>Registrar Google Workspace</li>
+                <li>Contratar Hostinger Premium</li>
+            </ul>
+            
+            <p><strong>4️⃣ Implementar sistema (día 4-7)</strong></p>
+            <ul style="margin: 5px 0 15px 30px;">
+                <li>Subir archivos al servidor</li>
+                <li>Configurar correos</li>
+                <li>Capacitar usuarios</li>
+            </ul>
+        </div>
+    </div>
+    
+    <div class="success-box" style="margin-top: 15px;">
+        <strong>⏱️ Tiempo total estimado: 1 semana</strong>
+    </div>
+    
+    <div class="slide-number">22</div>
+</div>
+
+<!-- SLIDE 23: Contactos -->
+<div class="slide">
+    <h1>Contactos Útiles</h1>
+    
+    <h2>🏪 Tiendas de Tecnología - Guatemala</h2>
+    <table class="small-table">
+        <tbody>
+            <tr>
+                <td><strong>Agencias Way</strong></td>
+                <td>📞 2310-5555</td>
+                <td>🌐 agenciasway.com</td>
+            </tr>
+            <tr>
+                <td><strong>Kemik Guatemala</strong></td>
+                <td>📞 2366-9595</td>
+                <td>🌐 kemik.gt</td>
+            </tr>
+            <tr>
+                <td><strong>Compugreiff</strong></td>
+                <td>📞 Consultar web</td>
+                <td>🌐 compugreiff.com</td>
+            </tr>
+        </tbody>
+    </table>
+    
+    <h2 style="margin-top: 25px;">🌐 Servicios en Línea</h2>
+    <table class="small-table">
+        <tbody>
+            <tr>
+                <td><strong>Google Workspace</strong></td>
+                <td colspan="2">🌐 workspace.google.com<br>💬 Soporte 24/7 en español</td>
+            </tr>
+            <tr>
+                <td><strong>Hostinger</strong></td>
+                <td colspan="2">🌐 hostinger.com<br>💬 Chat en vivo 24/7 en español</td>
+            </tr>
+        </tbody>
+    </table>
+    
+    <div class="info-box" style="margin-top: 25px;">
+        <strong>📚 Recursos:</strong><br>
+        • Guía de Google Workspace para empresas<br>
+        • Tutorial Hostinger cPanel en YouTube<br>
+        • Documentación técnica del sistema
+    </div>
+    
+    <div class="slide-number">23</div>
+</div>
+
+<!-- SLIDE 24: Gracias -->
+<div class="slide title-slide">
+    <h1 style="font-size: 54px;">¡GRACIAS!</h1>
+    <div class="subtitle" style="margin-top: 40px; font-size: 28px;">¿Preguntas?</div>
+    <div style="font-size: 20px; margin-top: 60px; opacity: 0.9;">
+        Presentación de Cotizaciones<br>
+        Sistema de Control de Rendimiento de Embonchadores<br>
+        <br>
+        Octubre 2025
+    </div>
+</div>
+
+</div>
+
+<script>
+let currentSlide = 0;
+const slides = document.querySelectorAll('.slide');
+
+function showSlide(n) {
+    if (n >= slides.length) currentSlide = slides.length - 1;
+    if (n < 0) currentSlide = 0;
+    else currentSlide = n;
+    
+    slides[currentSlide].scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
+
+function nextSlide() {
+    showSlide(currentSlide + 1);
+}
+
+function previousSlide() {
+    showSlide(currentSlide - 1);
+}
+
+// Navegación con teclado
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'ArrowRight' || e.key === 'ArrowDown' || e.key === ' ') {
+        e.preventDefault();
+        nextSlide();
+    } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
+        e.preventDefault();
+        previousSlide();
+    } else if (e.key === 'Home') {
+        e.preventDefault();
+        showSlide(0);
+    } else if (e.key === 'End') {
+        e.preventDefault();
+        showSlide(slides.length - 1);
+    }
+});
+
+// Detectar slide actual mientras se hace scroll
+let scrollTimeout;
+window.addEventListener('scroll', function() {
+    clearTimeout(scrollTimeout);
+    scrollTimeout = setTimeout(function() {
+        slides.forEach((slide, index) => {
+            const rect = slide.getBoundingClientRect();
+            if (rect.top >= -100 && rect.top < 300) {
+                currentSlide = index;
+            }
+        });
+    }, 100);
+});
+
+// Instrucciones en consola
+console.log('%c📊 PRESENTACIÓN POWERPOINT - INSTRUCCIONES', 'font-size: 16px; font-weight: bold; color: #0078d4;');
+console.log('%c✅ Navegación:', 'font-weight: bold; color: #28a745;');
+console.log('  • Flechas ← → ↑ ↓ para navegar');
+console.log('  • Espacio para avanzar');
+console.log('  • Home/End para ir al inicio/final');
+console.log('%c📄 Para guardar como PDF:', 'font-weight: bold; color: #0078d4;');
+console.log('  1. Click en "Descargar PDF" o presiona Ctrl+P');
+console.log('  2. Selecciona "Guardar como PDF"');
+console.log('  3. Ajusta márgenes a "Ninguno"');
+console.log('  4. Guarda el archivo');
+console.log('%c💡 Tip:', 'font-weight: bold; color: #ffc107;');
+console.log('  Para copiar a PowerPoint, guarda como PDF y luego importa las páginas');
+</script>
+
+</body>
+</html>
