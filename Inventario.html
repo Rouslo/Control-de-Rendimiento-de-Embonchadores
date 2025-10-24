@@ -139,6 +139,7 @@
                                 <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700">Embonchadora</th>
                                 <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700">Clasificadora</th>
                                 <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700">Total Bonches</th>
+                                <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700">Fecha</th>
                                 <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700">Días Trabajados</th>
                                 <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700">Total Horas</th>
                                 <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700">Prom. Horas/Día</th>
@@ -512,7 +513,7 @@
                 r.hora,
                 r.mesa,
                 r.nombre,
-                r.claificadora,
+                r.clasificadora,
                 r.variedad,
                 r.tamanio,
                 r.empaque,
@@ -522,7 +523,7 @@
 
             doc.autoTable({
                 startY: yPos,
-                head: [['Fecha', 'Hora', 'M', 'Embonchadora', 'Clasificadora', 'Variedad', 'Tamaño', 'Empaque', 'Cant', 'Obs']],
+                head: [['Fecha', 'Hora', 'Mesa', 'Embonchadora', 'Clasificadora', 'Variedad', 'Tamaño', 'Empaque', 'Cantidad', 'Observaciones']],
                 body: dataRegistros,
                 theme: 'striped',
                 headStyles: { 
@@ -573,6 +574,7 @@
             const dataEstadisticas = statsOrdenados.map(s => [
                 s.mesa,
                 s.nombre,
+                s.clasificadora,
                 s.totalBonches,
                 s.fechasTrabajadas,
                 s.totalHoras,
@@ -582,7 +584,7 @@
 
             doc.autoTable({
                 startY: yPos,
-                head: [['Mesa', 'Nombre', 'Total Bonches', 'Fechas Trabajadas', 'Horas', 'Prom. H/Día', 'Prom. B/H']],
+                head: [['Mesa', 'Nombre', 'Clasificadora', 'Total Bonches', 'Fechas Trabajadas', 'Horas', 'Prom. H/Día', 'Prom. B/H']],
                 body: dataEstadisticas,
                 theme: 'striped',
                 headStyles: { 
@@ -599,11 +601,12 @@
                 columnStyles: {
                     0: { halign: 'center', cellWidth: 15 },
                     1: { halign: 'left', cellWidth: 60 },
-                    2: { halign: 'center', cellWidth: 25, fontStyle: 'bold' },
-                    3: { halign: 'center', cellWidth: 70, fontSize: 7 },
-                    4: { halign: 'center', cellWidth: 20 },
-                    5: { halign: 'center', cellWidth: 25 },
-                    6: { halign: 'center', cellWidth: 25, fontStyle: 'bold', textColor: [22, 163, 74] }
+                    2: { halign: 'left', cellWidth: 60 },
+                    3: { halign: 'center', cellWidth: 25, fontStyle: 'bold' },
+                    4: { halign: 'center', cellWidth: 70, fontSize: 7 },
+                    5: { halign: 'center', cellWidth: 20 },
+                    6: { halign: 'center', cellWidth: 25 },
+                    7: { halign: 'center', cellWidth: 25, fontStyle: 'bold', textColor: [22, 163, 74] }
                 },
                 alternateRowStyles: { fillColor: colorSecundario }
             });
@@ -611,7 +614,8 @@
             // TOTALES
             const totalEmpleados = statsOrdenados.length;
             const totalHorasRegistradas = statsOrdenados.reduce((sum, s) => sum + s.totalHoras, 0);
-            const promedioGeneralBonches = totalHorasRegistradas > 0 ? (totalBonchesGeneral / totalHorasRegistradas).toFixed(1) : 0;
+            const promedioGeneralBonches = totalHorasRegistradas > 0 
+                ? (totalBonchesGeneral / totalHorasRegistradas).toFixed(1) : '0.0';
 
             yPos = doc.lastAutoTable.finalY + 8;
             
@@ -621,7 +625,7 @@
             doc.setTextColor(...colorPrimario);
             doc.setFontSize(11);
             doc.setFont(undefined, 'bold');
-            doc.text(`TOTALES: ${totalEmpleados} empleados  |  ${totalBonchesGeneral} bonches  |  ${totalHorasRegistradas} horas  |  ${promedioGeneralBonches} bonches/hora promedio`, 148.5, yPos + 2, { align: 'center' });
+            doc.text(`TOTALES: ${totalEmpleados} empleados  | ${totalClasificadoras} clasificadoras  |  ${totalBonchesGeneral} bonches  |  ${totalHorasRegistradas} horas  |  ${promedioGeneralBonches} bonches/hora promedio`, 148.5, yPos + 2, { align: 'center' });
 
             // SECCIÓN 3: TOP 5 PRODUCTORES
             yPos += 25;
